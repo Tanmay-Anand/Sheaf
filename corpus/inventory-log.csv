@@ -1,0 +1,25 @@
+item_id,item_name,category,warehouse,qty_on_hand,unit_cost,reorder_level,last_restocked,supplier
+SKU-001,Wireless Headphones,Electronics,Mumbai,45,1800,20,2025-01-15,SoundWave Pvt Ltd
+SKU-002,Bluetooth Speaker,Electronics,Delhi,12,2400,15,2025-01-20,SoundWave Pvt Ltd
+SKU-003,USB-C Hub,Electronics,Bangalore,8,1200,10,2025-02-01,TechBridge India
+SKU-004,Smart Watch,Electronics,Mumbai,3,6500,5,2025-01-10,DigitalEdge Co
+SKU-005,Laptop Stand,Electronics,Delhi,30,1500,10,2025-02-10,TechBridge India
+SKU-006,Cotton T-Shirt,Apparel,Bangalore,200,350,50,2025-01-25,FabricCraft Ltd
+SKU-007,Running Shorts,Apparel,Mumbai,85,550,30,2025-01-18,FabricCraft Ltd
+SKU-008,Denim Jacket,Apparel,Delhi,18,2100,10,2025-02-05,StyleHouse India
+SKU-009,Formal Shirt,Apparel,Bangalore,40,1000,20,2025-01-30,StyleHouse India
+SKU-010,Hoodie,Apparel,Mumbai,55,1400,25,2025-02-12,FabricCraft Ltd
+SKU-011,Organic Oats 1kg,Food,Delhi,320,100,100,2025-02-08,GreenHarvest Foods
+SKU-012,Basmati Rice 5kg,Food,Mumbai,150,280,50,2025-01-22,GreenHarvest Foods
+SKU-013,Whey Protein 1kg,Food,Bangalore,7,1600,15,2025-01-28,NutriSource India
+SKU-014,Green Tea 50-pack,Food,Delhi,90,170,30,2025-02-01,TeaLeaf Exports
+SKU-015,Bamboo Cutting Board,Home,Mumbai,25,600,10,2025-01-30,EcoHome Products
+SKU-016,Air Purifier,Home,Bangalore,4,5000,5,2025-01-12,CleanAir Tech
+SKU-017,Bath Towel Set,Home,Delhi,60,900,20,2025-02-06,HomeComfort Ltd
+SKU-018,Smart LED Bulb x6,Home,Mumbai,35,1000,15,2025-02-09,BrightLight Co
+SKU-019,Yoga Mat,Sports,Bangalore,40,900,15,2025-01-20,FitLife Equipment
+SKU-020,Dumbbell Set 10kg,Sports,Delhi,6,6500,5,2025-01-15,FitLife Equipment
+SKU-021,Cricket Bat,Sports,Mumbai,9,2500,5,2025-02-02,PlayField Sports
+SKU-022,Badminton Set,Sports,Bangalore,22,1600,8,2025-01-25,PlayField Sports
+SKU-023,Running Shoes,Sports,Delhi,2,3500,8,2025-01-08,StridePro Footwear
+SKU-024,Foam Roller,Sports,Mumbai,14,700,10,2025-02-04,FitLife Equipment

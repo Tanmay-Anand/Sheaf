@@ -1,0 +1,24 @@
+Q1 2025 Regional Sales Report,,,,,,,,
+,,,,,,,,
+Region,Rep Name,Date,Product,Qty,Price,Amount,Status,Notes
+North,,,,,,,,
+North,Vikram Singh,01/06/2025,Headphones,2,2499,4998,Delivered,
+North,Vikram Singh,Jan 13 2025,Speaker,1,3499,3499,Delivered,
+North,Vikram Singh,2025-01-20,USB Hub,3,1799,5397,Delivered,
+North,Vikram Singh,20-Jan-25,Smart Watch,1,8999,8999,Returned,Customer dissatisfied
+,,SUBTOTAL NORTH,,7,,22893,,
+South,,,,,,,,
+South,Anita Reddy,01/15/2025,Yoga Mat,4,1299,$5196,Shipped,amount incl GST
+South,Anita Reddy,February 3 2025,T-Shirt,5,599,2995,Delivered,
+South,Anita Reddy,2025-02-10,Oats 1kg,20,149,2980,Delivered,
+South,Anita Reddy,10/02/2025,Running Shorts,3,799,2397,Returned,wrong size
+,,SUBTOTAL SOUTH,,32,,13568,,
+East,,,,,,,,
+East,Mohan Kumar,03/01/2025,Laptop Stand,2,2199,4398,Delivered,
+East,Mohan Kumar,2025-Mar-08,Protein 1kg,3,2199,6597,Delivered,
+East,Mohan Kumar,March 15 2025,Bath Towels,10,1299,12990,Delivered,bulk order
+,,SUBTOTAL EAST,,15,,23985,,
+,,,,,,,,
+,,GRAND TOTAL,,54,,60446,,
+,,,,,,,,
+Notes:,,,,,,,,"Amounts shown in INR. Some entries include GST. Date formats vary by rep — to be standardised in Q2."

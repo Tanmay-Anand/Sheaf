@@ -1,0 +1,76 @@
+order_id,order_date,region,channel,product_category,product_name,quantity,unit_price,amount,discount_pct,status,customer_type
+ORD-001,2024-01-08,North,online,Electronics,Wireless Headphones,2,2499,4998,5,shipped,retail
+ORD-002,2024-01-12,South,retail,Apparel,Cotton T-Shirt,5,599,2995,0,shipped,retail
+ORD-003,2024-01-15,East,wholesale,Food,Organic Oats 1kg,20,149,2980,10,shipped,business
+ORD-004,2024-01-19,West,online,Home,Bamboo Cutting Board,3,899,2697,0,returned,retail
+ORD-005,2024-01-22,North,direct,Electronics,USB-C Hub,1,1799,1799,0,shipped,business
+ORD-006,2024-02-03,Central,online,Sports,Yoga Mat,4,1299,5196,5,shipped,retail
+ORD-007,2024-02-07,South,retail,Electronics,Bluetooth Speaker,2,3499,6998,0,shipped,retail
+ORD-008,2024-02-14,NE,wholesale,Food,Basmati Rice 5kg,15,389,5835,8,shipped,business
+ORD-009,2024-02-18,East,online,Apparel,Running Shorts,3,799,2397,0,returned,retail
+ORD-010,2024-02-25,North,direct,Home,Stainless Water Bottle,6,549,3294,0,shipped,business
+ORD-011,2024-03-04,West,online,Electronics,Smart Watch,1,8999,8999,10,shipped,retail
+ORD-012,2024-03-09,Central,retail,Food,Green Tea 50-pack,8,249,1992,0,shipped,retail
+ORD-013,2024-03-14,South,wholesale,Sports,Resistance Bands Set,12,699,8388,5,shipped,business
+ORD-014,2024-03-21,NE,online,Home,Desk Organiser,2,1199,2398,0,shipped,retail
+ORD-015,2024-03-28,North,direct,Apparel,Formal Shirt,3,1499,4497,0,returned,business
+ORD-016,2024-04-05,East,online,Electronics,Laptop Stand,2,2199,4398,0,shipped,retail
+ORD-017,2024-04-11,West,retail,Food,Cold-Press Olive Oil,4,699,2796,0,shipped,retail
+ORD-018,2024-04-17,Central,wholesale,Apparel,Polo T-Shirt 6-pack,10,3599,35990,12,shipped,business
+ORD-019,2024-04-23,South,online,Sports,Foam Roller,3,999,2997,0,returned,retail
+ORD-020,2024-04-29,NE,direct,Home,Wooden Photo Frame,5,499,2495,0,shipped,retail
+ORD-021,2024-05-06,North,online,Electronics,Noise-Cancel Earbuds,2,5999,11998,5,shipped,retail
+ORD-022,2024-05-13,East,retail,Food,Whey Protein 1kg,3,2199,6597,0,shipped,retail
+ORD-023,2024-05-19,West,wholesale,Sports,Football,10,799,7990,10,shipped,business
+ORD-024,2024-05-26,Central,online,Home,Air Purifier,1,6999,6999,0,pending,retail
+ORD-025,2024-06-02,South,direct,Apparel,Denim Jacket,2,2999,5998,0,shipped,retail
+ORD-026,2024-06-09,NE,online,Electronics,Power Bank 20000mAh,4,1499,5996,0,shipped,retail
+ORD-027,2024-06-16,North,retail,Food,Protein Bars 12-pack,6,1299,7794,0,shipped,retail
+ORD-028,2024-06-23,East,wholesale,Home,Modular Shelf,3,4499,13497,7,shipped,business
+ORD-029,2024-07-01,West,online,Sports,Tennis Racket,1,4999,4999,0,pending,retail
+ORD-030,2024-07-08,Central,retail,Electronics,Mechanical Keyboard,2,3799,7598,0,shipped,retail
+ORD-031,2024-07-15,South,direct,Apparel,Sports Jacket,4,2499,9996,5,shipped,business
+ORD-032,2024-07-22,NE,online,Food,Almond Butter 500g,5,549,2745,0,returned,retail
+ORD-033,2024-08-05,North,wholesale,Home,Stainless Steel Cookware,2,8999,17998,10,shipped,business
+ORD-034,2024-08-12,East,online,Electronics,Gaming Mouse,3,1999,5997,0,shipped,retail
+ORD-035,2024-08-19,West,retail,Sports,Cricket Bat,2,3499,6998,0,shipped,retail
+ORD-036,2024-08-26,Central,direct,Apparel,Linen Trousers,4,1799,7196,0,returned,retail
+ORD-037,2024-09-03,South,online,Food,Dark Chocolate 200g,10,299,2990,0,shipped,retail
+ORD-038,2024-09-10,NE,wholesale,Electronics,HDMI Cable 2m,20,399,7980,5,shipped,business
+ORD-039,2024-09-17,North,retail,Home,Throw Blanket,3,1299,3897,0,shipped,retail
+ORD-040,2024-09-24,East,online,Sports,Badminton Set,2,2299,4598,0,shipped,retail
+ORD-041,2024-10-07,West,direct,Electronics,Portable Charger,5,999,4995,0,shipped,business
+ORD-042,2024-10-14,Central,online,Food,Oat Milk 1L x6,8,499,3992,0,shipped,retail
+ORD-043,2024-10-21,South,retail,Apparel,Windcheater,3,1999,5997,0,shipped,retail
+ORD-044,2024-10-28,NE,wholesale,Home,Bath Towel Set,15,1299,19485,8,shipped,business
+ORD-045,2024-11-04,North,online,Sports,Swimming Goggles,4,799,3196,0,returned,retail
+ORD-046,2024-11-11,East,direct,Electronics,Ring Light 18-inch,2,4499,8998,5,shipped,retail
+ORD-047,2024-11-18,West,retail,Food,Quinoa 500g,6,399,2394,0,shipped,retail
+ORD-048,2024-11-25,Central,online,Home,Smart LED Bulb x6,4,1499,5996,0,shipped,retail
+ORD-049,2024-12-02,South,wholesale,Apparel,Winter Jacket Bulk,8,5499,43992,15,shipped,business
+ORD-050,2024-12-09,NE,online,Electronics,Wireless Charger,6,1299,7794,0,shipped,retail
+ORD-051,2024-12-16,North,retail,Sports,Yoga Block Set,5,699,3495,0,shipped,retail
+ORD-052,2024-12-23,East,direct,Food,Cashew 250g,4,599,2396,0,shipped,retail
+ORD-053,2025-01-06,West,online,Home,Bamboo Desk Tray,3,1199,3597,0,shipped,retail
+ORD-054,2025-01-13,Central,wholesale,Electronics,Laptop Cooling Pad,10,1599,15990,10,shipped,business
+ORD-055,2025-01-20,South,retail,Apparel,Formal Trousers,4,1799,7196,0,shipped,retail
+ORD-056,2025-01-27,NE,online,Sports,Skipping Rope,7,499,3493,0,shipped,retail
+ORD-057,2025-02-03,North,direct,Food,Matcha Powder 100g,5,899,4495,0,returned,retail
+ORD-058,2025-02-10,East,retail,Electronics,Webcam 1080p,3,2999,8997,0,shipped,retail
+ORD-059,2025-02-17,West,wholesale,Home,Curtain Rod Set,12,799,9588,5,shipped,business
+ORD-060,2025-02-24,Central,online,Sports,Gym Gloves,6,599,3594,0,shipped,retail
+ORD-061,2025-03-03,South,online,Electronics,Tablet Stand,4,1299,5196,0,shipped,retail
+ORD-062,2025-03-10,NE,direct,Apparel,Hoodie,5,1999,9995,5,shipped,retail
+ORD-063,2025-03-17,North,retail,Food,Dried Mango 200g,8,349,2792,0,shipped,retail
+ORD-064,2025-03-24,East,wholesale,Home,Storage Basket Set,10,1499,14990,8,shipped,business
+ORD-065,2025-04-01,West,online,Sports,Running Shoes,2,4999,9998,10,returned,retail
+ORD-066,2025-04-08,Central,retail,Electronics,Smart Plug x4,6,1299,7794,0,shipped,retail
+ORD-067,2025-04-15,South,direct,Apparel,Cargo Shorts,4,1299,5196,0,shipped,retail
+ORD-068,2025-04-22,NE,online,Food,Greek Yogurt x6,9,249,2241,0,shipped,retail
+ORD-069,2025-04-29,North,wholesale,Home,Garden Trowel Set,20,599,11980,5,shipped,business
+ORD-070,2025-05-06,East,retail,Sports,Weight Training Gloves,5,799,3995,0,shipped,retail
+ORD-071,2025-05-13,West,online,Electronics,LED Desk Lamp,4,1799,7196,0,shipped,retail
+ORD-072,2025-05-20,Central,direct,Apparel,Linen Shirt,3,1699,5097,0,returned,retail
+ORD-073,2025-05-27,South,wholesale,Food,Sunflower Seeds 1kg,14,229,3206,8,shipped,business
+ORD-074,2025-06-03,NE,online,Home,Ceramic Plant Pot Set,5,999,4995,0,shipped,retail
+ORD-075,2025-06-10,North,retail,Sports,Dumbbell Set 10kg,2,8999,17998,5,shipped,retail

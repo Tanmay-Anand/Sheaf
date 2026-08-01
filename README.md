@@ -9,7 +9,7 @@
 
 **A typed transformation engine for spreadsheets.**
 
-Ask a question in plain English. Sheaf compiles it into a typed program you can read, type-check, edit, and replay — then executes it deterministically against your workbook. The language model plans. It never touches a cell.
+Ask a question in plain English. Sheaf compiles it into a typed program you can read, type-check, edit, and replay: then executes it deterministically against your workbook. The language model plans. It never touches a cell.
 
 ---
 
@@ -46,9 +46,9 @@ prompt + semantic model ──► LLM ──► program in a typed IR
                                        commit ──► cells
 ```
 
-Everything after planning is ordinary, testable, deterministic software. The IR is a **closed algebra** — no user-defined functions, no loops, no recursion — so every program provably terminates and its output columns are statically known. The plan is data: inspectable, editable, diffable, storable, re-runnable.
+Everything after planning is ordinary, testable, deterministic software. The IR is a **closed algebra** —> no user-defined functions, no loops, no recursion —> so every program provably terminates and its output columns are statically known. The plan is data: inspectable, editable, diffable, storable, re-runnable.
 
-**Workbook contents never leave the machine.** The model sees an inferred schema — column names, types, cardinalities, a handful of value exemplars — never rows.
+**Workbook contents never leave the machine.** The model sees an inferred schema: column names, types, cardinalities, a handful of value exemplars; never rows.
 
 ---
 
@@ -58,7 +58,7 @@ Sales sheet, 4,021 rows. User types:
 
 > *"quarterly revenue by region, excluding returns"*
 
-**1 — Profile** (client-side). Sheaf infers structure, not values:
+**1: Profile** (client-side). Sheaf infers structure, not values:
 
 ```
 Sheet1!A1:H4021, header row 1
@@ -69,7 +69,7 @@ Sheet1!A1:H4021, header row 1
   status      categorical, 3 distinct {shipped, returned, pending}
 ```
 
-**2 — Plan.** The model receives that schema plus the approved semantic model, and emits IR:
+**2: Plan.** The model receives that schema plus the approved semantic model, and emits IR:
 
 ```json
 {
@@ -87,53 +87,51 @@ Sheet1!A1:H4021, header row 1
 
 No cell addresses invented. No formulas hallucinated. No arbitrary code.
 
-**3 — Type-check.** `sum` requires numeric; `amount` is `currency` ✓. `quarterOf` requires `date`; `order_date` ✓. Had the model written `{"fn":"sum","of":"region"}`, the checker rejects it — `E_TYPE: sum expects numeric, got categorical(region)` — and that diagnostic goes back to the model as a repair hint. Compiler loop, not "try again."
+**3: Type-check.** `sum` requires numeric; `amount` is `currency` ✓. `quarterOf` requires `date`; `order_date` ✓. Had the model written `{"fn":"sum","of":"region"}`, the checker rejects it —> `E_TYPE: sum expects numeric, got categorical(region)` —> and that diagnostic goes back to the model as a repair hint. Compiler loop, not "try again."
 
-**4 — Evaluate.** The plan runs in memory. Nothing is written yet.
+**4: Evaluate.** The plan runs in memory. Nothing is written yet.
 
-**5 — Preview.** Real numbers, real dimensions, before any cell changes:
+**5: Preview.** Real numbers, real dimensions, before any cell changes:
 
 > Reads `Orders` (`Sheet1!A1:H4021`). Excludes **312** rows where `status = returned`. Groups by region × quarter, sums `amount`. Result: **6 rows × 11 columns**. Writes to a new sheet `Analysis` at `A1`. **No existing data is overwritten.**
 
-**6 — Commit.** One batched write. The plan, the ranges read, the ranges written, and the row counts are recorded.
+**6: Commit.** One batched write. The plan, the ranges read, the ranges written, and the row counts are recorded.
 
-**7 — Replay.** Next quarter, new data, same plan, one click.
+**7: Replay.** Next quarter, new data, same plan, one click.
 
 ---
 
 ## What makes it different
 
-| | Direct-write AI add-ins | Sheaf |
-|---|---|---|
-| What the model produces | cell writes | a typed program |
-| Reviewable before running | no | yes — with real numbers |
-| Reproducible | no | yes — the plan is the artifact |
-| Data sent to the model | rows | schema only |
-| Failure mode | plausible wrong numbers | explicit "I can't express that" |
+| | Direct-write AI add-ins | Sheaf                                     |
+|---|---|-------------------------------------------|
+| What the model produces | cell writes | a typed program                           |
+| Reviewable before running | no | yes, with real numbers                    |
+| Reproducible | no | yes, the plan is the artifact             |
+| Data sent to the model | rows | schema only                               |
+| Failure mode | plausible wrong numbers | explicit "I can't express that"           |
 | Write blast radius | anywhere | structurally bounded to the declared sink |
-| Auditable | no | plan + ranges + counts recorded per run |
+| Auditable | no | plan + ranges + counts recorded per run   |
 
 ---
 
 ## Core concepts
 
-**Semantic model** — a per-workbook layer above the physical schema: named entities, metrics with aggregation rules, dimensions, time dimensions, synonyms, and validated join paths between ranges. Proposed by the model, approved once by the user, persisted with the workbook. This is what turns *"exclude the returns"* from something the user must remember to say into part of the definition of Revenue.
+**Semantic model**: a per-workbook layer above the physical schema: named entities, metrics with aggregation rules, dimensions, time dimensions, synonyms, and validated join paths between ranges. Proposed by the model, approved once by the user, persisted with the workbook. This is what turns *"exclude the returns"* from something the user must remember to say into part of the definition of Revenue.
 
-**The IR** — a closed relational algebra with spreadsheet extensions. Six operators in v1: `filter`, `derive`, `aggregate`, `sort`, `join`, `pivot`, plus `periodCompare`. Deliberately small. Every proposed seventh operator has to justify itself against verifiability.
+**The IR**: a closed relational algebra with spreadsheet extensions. Six operators in v1: `filter`, `derive`, `aggregate`, `sort`, `join`, `pivot`, plus `periodCompare`. Deliberately small. Every proposed seventh operator has to justify itself against verifiability.
 
-**The validator** — a type system over the IR. Checks every referenced metric and dimension exists, every operator's signature is satisfied, every join traverses a declared path, and computes the output column type statically. Emits structured diagnostics, not prose.
+**The validator**: a type system over the IR. Checks every referenced metric and dimension exists, every operator's signature is satisfied, every join traverses a declared path, and computes the output column type statically. Emits structured diagnostics, not prose.
 
-**Evaluate / commit split** — evaluation is pure and in-memory; commit is the only thing that touches the grid, in a single batched write bounded to the sink declared in the validated plan. No plan can write outside what the preview showed, regardless of what the prompt said.
+**Evaluate / commit split**: evaluation is pure and in-memory; commit is the only thing that touches the grid, in a single batched write bounded to the sink declared in the validated plan. No plan can write outside what the preview showed, regardless of what the prompt said.
 
-**Contribution analysis** — *"why did revenue drop last quarter?"* is answered by deterministic code, not by a model: resolve metric and periods, compute the delta, fan out across every dimension, rank members by contribution. The model only narrates a table Sheaf computed.
+**Contribution analysis**: *"why did revenue drop last quarter?"* is answered by deterministic code, not by a model: resolve metric and periods, compute the delta, fan out across every dimension, rank members by contribution. The model only narrates a table Sheaf computed.
 
-**Provenance** — every run records the plan, the model and prompt version, the ranges read, the ranges written, and the row counts. Reproducible, diffable, auditable.
+**Provenance**: every run records the plan, the model and prompt version, the ranges read, the ranges written, and the row counts. Reproducible, diffable, auditable.
 
 ---
 
-## Status
-
-Design complete. Implementation not started. See [`IMPLEMENTATION-PLAN.md`](./IMPLEMENTATION-PLAN.md) for the milestone map and [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the system design and the decisions behind it.
+ See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the system design and the decisions behind it.
 
 ## Non-goals
 

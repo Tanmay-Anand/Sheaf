@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-# Sheaf — Architecture
+# Sheaf: Architecture
 
 **Status:** Design v1 · **Scope:** system design, the IR and its type system, execution model, security model, and the decisions behind them.
 
