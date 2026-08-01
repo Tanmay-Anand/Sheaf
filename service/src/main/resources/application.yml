@@ -1,0 +1,12 @@
+# Local dev: if port 8080 is busy, override with: --server.port=8090
+# Windows 11 + Java 21 NIO issue workaround: add JVM flag
+#   -Djdk.nio.enableUnixDomainSpecialFiles=false
+# or run via: mvn spring-boot:run -Dspring-boot.run.jvmArguments=-Djdk.nio.enableUnixDomainSpecialFiles=false
+server:
+  port: 8080
+
+spring:
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
