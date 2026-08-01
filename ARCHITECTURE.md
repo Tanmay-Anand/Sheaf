@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="Resources/Sheaf-logo-dark-glass.png">
+    <img src="Resources/Sheaf-logo-light-glass.png" alt="Sheaf" width="200">
+  </picture>
+</p>
+
 # Sheaf — Architecture
 
 **Status:** Design v1 · **Scope:** system design, the IR and its type system, execution model, security model, and the decisions behind them.
