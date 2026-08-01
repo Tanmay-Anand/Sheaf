@@ -1,5 +1,3 @@
-"";
-
 export interface PlanSchema {
   meta?: {
     generatedAt?: string;
