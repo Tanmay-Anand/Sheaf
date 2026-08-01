@@ -1,0 +1,26 @@
+project_id,project_name,task_id,task,assignee,start_date,end_date,status,priority,effort_hours,completion_pct
+P01,Checkout Redesign,T001,UX wireframes,Neha Joshi,2025-01-06,2025-01-17,completed,high,16,100
+P01,Checkout Redesign,T002,API contract design,Rohit Verma,2025-01-06,2025-01-17,completed,high,12,100
+P01,Checkout Redesign,T003,Frontend implementation,Neha Joshi,2025-01-20,2025-02-14,completed,high,60,100
+P01,Checkout Redesign,T004,Backend implementation,Rohit Verma,2025-01-20,2025-02-07,completed,high,40,100
+P01,Checkout Redesign,T005,QA & regression testing,Kiran Mehta,2025-02-10,2025-02-21,completed,high,24,100
+P01,Checkout Redesign,T006,Production deployment,Rohit Verma,2025-02-24,2025-02-24,completed,critical,4,100
+P02,Inventory Sync v2,T007,Requirements gathering,Priya Sharma,2025-01-13,2025-01-24,completed,medium,8,100
+P02,Inventory Sync v2,T008,Database schema migration,Rohit Verma,2025-01-27,2025-02-07,completed,high,20,100
+P02,Inventory Sync v2,T009,Sync service implementation,Arun Pillai,2025-02-10,2025-03-07,completed,high,80,100
+P02,Inventory Sync v2,T010,Integration testing,Kiran Mehta,2025-03-10,2025-03-21,in_progress,high,32,65
+P02,Inventory Sync v2,T011,Performance benchmarking,Arun Pillai,2025-03-17,2025-03-28,not_started,medium,16,0
+P03,Analytics Dashboard,T012,Data model design,Priya Sharma,2025-02-03,2025-02-14,completed,high,20,100
+P03,Analytics Dashboard,T013,Chart component library,Neha Joshi,2025-02-17,2025-03-07,completed,medium,40,100
+P03,Analytics Dashboard,T014,Backend aggregation APIs,Arun Pillai,2025-02-17,2025-03-14,in_progress,high,48,80
+P03,Analytics Dashboard,T015,Dashboard layout,Neha Joshi,2025-03-10,2025-03-28,in_progress,medium,32,40
+P03,Analytics Dashboard,T016,User acceptance testing,Kiran Mehta,2025-03-31,2025-04-11,not_started,medium,20,0
+P04,Mobile App Auth,T017,OAuth flow design,Priya Sharma,2025-02-24,2025-03-07,completed,critical,12,100
+P04,Mobile App Auth,T018,Token refresh implementation,Rohit Verma,2025-03-03,2025-03-14,completed,critical,24,100
+P04,Mobile App Auth,T019,Biometric auth integration,Arun Pillai,2025-03-10,2025-03-21,completed,high,20,100
+P04,Mobile App Auth,T020,Security review,Kiran Mehta,2025-03-17,2025-03-28,overdue,critical,8,30
+P04,Mobile App Auth,T021,Pen test sign-off,Priya Sharma,2025-03-31,2025-04-04,not_started,critical,4,0
+P05,Seller Portal,T022,Stakeholder interviews,Neha Joshi,2025-03-17,2025-03-28,completed,medium,16,100
+P05,Seller Portal,T023,Product spec,Priya Sharma,2025-03-24,2025-04-04,in_progress,medium,24,50
+P05,Seller Portal,T024,Design sprints,Neha Joshi,2025-04-07,2025-04-25,not_started,medium,40,0
+P05,Seller Portal,T025,Backend scaffolding,Rohit Verma,2025-04-07,2025-04-18,not_started,medium,20,0

@@ -1,0 +1,33 @@
+category,subcategory,owner,month,year,budgeted_amount,actual_amount,currency,notes
+Engineering,Cloud Infrastructure,Arjun Nair,Jan,2025,120000,134500,INR,Azure cost spike from new service rollout
+Engineering,Cloud Infrastructure,Arjun Nair,Feb,2025,120000,118200,INR,
+Engineering,Cloud Infrastructure,Arjun Nair,Mar,2025,120000,122800,INR,
+Engineering,Cloud Infrastructure,Arjun Nair,Apr,2025,125000,141200,INR,Data pipeline migration added cost
+Engineering,SaaS Tools,Arjun Nair,Jan,2025,45000,43500,INR,
+Engineering,SaaS Tools,Arjun Nair,Feb,2025,45000,47800,INR,New monitoring tool added
+Engineering,SaaS Tools,Arjun Nair,Mar,2025,45000,45000,INR,
+Engineering,SaaS Tools,Arjun Nair,Apr,2025,45000,49200,INR,
+Marketing,Digital Ads,Deepa Rao,Jan,2025,200000,188000,INR,Under-spent on paid search
+Marketing,Digital Ads,Deepa Rao,Feb,2025,200000,224000,INR,Campaign push for product launch
+Marketing,Digital Ads,Deepa Rao,Mar,2025,200000,198000,INR,
+Marketing,Digital Ads,Deepa Rao,Apr,2025,220000,231500,INR,Q2 launch campaign
+Marketing,Events,Deepa Rao,Jan,2025,80000,62000,INR,Event postponed to Feb
+Marketing,Events,Deepa Rao,Feb,2025,80000,108000,INR,Event rescheduled; two in Feb
+Marketing,Events,Deepa Rao,Mar,2025,80000,77500,INR,
+Marketing,Events,Deepa Rao,Apr,2025,85000,84200,INR,
+Operations,Office & Facilities,Sonal Kapoor,Jan,2025,60000,58800,INR,
+Operations,Office & Facilities,Sonal Kapoor,Feb,2025,60000,61200,INR,
+Operations,Office & Facilities,Sonal Kapoor,Mar,2025,60000,59700,INR,
+Operations,Office & Facilities,Sonal Kapoor,Apr,2025,60000,63400,INR,Lease renewal negotiation costs
+Operations,Logistics,Sonal Kapoor,Jan,2025,150000,162000,INR,Peak return-shipment volume
+Operations,Logistics,Sonal Kapoor,Feb,2025,150000,148500,INR,
+Operations,Logistics,Sonal Kapoor,Mar,2025,150000,155200,INR,
+Operations,Logistics,Sonal Kapoor,Apr,2025,155000,159800,INR,
+HR,Recruiting,Tanvi Shah,Jan,2025,90000,85000,INR,Two open roles still in pipeline
+HR,Recruiting,Tanvi Shah,Feb,2025,90000,102000,INR,Three hires closed
+HR,Recruiting,Tanvi Shah,Mar,2025,90000,78000,INR,Hiring freeze for one role
+HR,Recruiting,Tanvi Shah,Apr,2025,90000,94500,INR,
+HR,Learning & Development,Tanvi Shah,Jan,2025,40000,38500,INR,
+HR,Learning & Development,Tanvi Shah,Feb,2025,40000,40000,INR,
+HR,Learning & Development,Tanvi Shah,Mar,2025,40000,43200,INR,External facilitator for leadership workshop
+HR,Learning & Development,Tanvi Shah,Apr,2025,40000,41000,INR,

@@ -1,0 +1,672 @@
+# Corpus Questions — M0
+
+**20 questions, hand-written IR.**
+15 are expressible in the v1 operator set. 5 are scope boundaries (3 genuinely ambiguous, 2 out of scope). Each IR is written longhand — the actual design activity.
+
+---
+
+## Assumed semantic model (abbreviated)
+
+**Entities**
+- `Orders` → `sales-orders.csv`
+- `Regions` → `regions-lookup.csv`
+- `Budget` → `team-budget.csv`
+- `Tasks` → `project-tracker.csv`
+- `Inventory` → `inventory-log.csv`
+
+**Metrics**
+- `Revenue` = `sum(amount)` on `Orders`, filter `ne(status, "returned")`, type `currency:INR`
+- `OrderCount` = `count(*)` on `Orders`, type `number`
+- `AvgOrderValue` = `avg(amount)` on `Orders`, type `currency:INR`
+- `ReturnedRevenue` = `sum(amount)` on `Orders`, filter `eq(status, "returned")`, type `currency:INR`
+- `BudgetedSpend` = `sum(budgeted_amount)` on `Budget`, type `currency:INR`
+- `ActualSpend` = `sum(actual_amount)` on `Budget`, type `currency:INR`
+- `EffortHours` = `sum(effort_hours)` on `Tasks`, type `number`
+- `InventoryValue` = `sum(mul(qty_on_hand, unit_cost))` on `Inventory`, type `currency:INR`
+
+**Dimensions**
+- `region` → `Orders.region`, categorical(6)
+- `channel` → `Orders.channel`, categorical(4)
+- `product_category` → `Orders.product_category`, categorical(5)
+- `status` → `Orders.status`, categorical(3)
+- `assignee` → `Tasks.assignee`, categorical(5)
+- `project_name` → `Tasks.project_name`, categorical(5)
+- `task_status` → `Tasks.status`, categorical(4)
+- `warehouse` → `Inventory.warehouse`, categorical(3)
+- `budget_category` → `Budget.category`, categorical(4)
+
+**Time dimensions**
+- `order_date` → `Orders.order_date`, date, grains: day/week/month/quarter/year
+- `task_end_date` → `Tasks.end_date`, date, grains: day/week/month
+
+**Approved joins**
+- `Orders.region` → `Regions.code`, many-to-one, confidence 1.0, approved
+
+---
+
+## Questions 1–15 (expressible)
+
+---
+
+### Q1 · "total revenue by region"
+
+Simple aggregation. The canonical starter question.
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": { "ne": ["status", "returned"] }
+    },
+    {
+      "op": "aggregate",
+      "groupBy": ["region"],
+      "measures": [{ "fn": "sum", "of": "amount", "as": "revenue" }]
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "revenue", "dir": "desc" }]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Type trace:**
+- Source table: `{ order_id: string, order_date: date, region: categorical(6), channel: categorical(4), product_category: categorical(5), product_name: string, quantity: number, unit_price: currency:INR, amount: currency:INR, discount_pct: percent, status: categorical(3), customer_type: categorical(2) }`
+- After `filter`: same columns, fewer rows; type unchanged
+- After `aggregate`: `{ region: categorical(6), revenue: currency:INR }`
+- After `sort`: same type, reordered
+- Output columns: **statically known** ✓
+
+**Note:** the `Revenue` metric already encodes the `ne(status, returned)` filter. In practice, the planner would reference the metric, not the raw column. This IR shows the raw form for illustration; the semantic-model-aware form uses `metric: "Revenue"` inside the aggregate measure.
+
+---
+
+### Q2 · "total revenue by region, excluding returned orders"
+
+User makes the exclusion explicit. Identical to Q1 since `Revenue` already excludes returns — this tests that the planner understands the metric definition rather than double-filtering.
+
+IR is identical to Q1. The `filter` step is a no-op if the metric's definition is applied first. The planner must not add a second `filter` step.
+
+**Design note:** Q1 and Q2 are the same question expressed differently. They should produce the same plan. This is a planner accuracy test as much as an IR test.
+
+---
+
+### Q3 · "number of orders by channel"
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "aggregate",
+      "groupBy": ["channel"],
+      "measures": [{ "fn": "count", "of": "*", "as": "order_count" }]
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "order_count", "dir": "desc" }]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Type trace:**
+- After `aggregate`: `{ channel: categorical(4), order_count: number }`
+- Output columns: statically known ✓
+
+**Note:** `count(*)` counts all rows regardless of status. This is intentional — the question asks about orders, not revenue. The planner must not silently apply the `Revenue` metric filter.
+
+---
+
+### Q4 · "average order value by region and channel"
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "aggregate",
+      "groupBy": ["region", "channel"],
+      "measures": [{ "fn": "avg", "of": "amount", "as": "avg_order_value" }]
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "region", "dir": "asc" }, { "col": "avg_order_value", "dir": "desc" }]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Type trace:**
+- After `aggregate`: `{ region: categorical(6), channel: categorical(4), avg_order_value: currency:INR }`
+- `avg(currency:INR)` → `currency:INR` ✓
+
+---
+
+### Q5 · "monthly revenue in 2025"
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": {
+        "and": [
+          { "ne": ["status", "returned"] },
+          { "gte": ["order_date", "2025-01-01"] },
+          { "lt":  ["order_date", "2026-01-01"] }
+        ]
+      }
+    },
+    {
+      "op": "derive",
+      "as": "month",
+      "expr": { "monthOf": "order_date" }
+    },
+    {
+      "op": "aggregate",
+      "groupBy": ["month"],
+      "measures": [{ "fn": "sum", "of": "amount", "as": "revenue" }]
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "month", "dir": "asc" }]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Type trace:**
+- After `filter`: same columns
+- After `derive`: `+ { month: number }` — `monthOf(date)` → `number` (1–12)
+- After `aggregate`: `{ month: number, revenue: currency:INR }`
+- Output columns: statically known ✓
+
+**Note:** `monthOf` returns an integer (1–12). The evaluator is responsible for rendering this as "Jan", "Feb", etc. The IR carries the integer; presentation is not the IR's concern.
+
+---
+
+### Q6 · "quarterly revenue by region, as a pivot table"
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": { "ne": ["status", "returned"] }
+    },
+    {
+      "op": "derive",
+      "as": "quarter",
+      "expr": { "quarterOf": "order_date" }
+    },
+    {
+      "op": "aggregate",
+      "groupBy": ["region", "quarter"],
+      "measures": [{ "fn": "sum", "of": "amount", "as": "revenue" }]
+    },
+    {
+      "op": "pivot",
+      "rows": ["region"],
+      "cols": "quarter",
+      "values": "revenue"
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Type trace:**
+- After `aggregate`: `{ region: categorical(6), quarter: number, revenue: currency:INR }`
+- After `pivot`: `{ region: categorical(6), Q1: currency:INR | null, Q2: currency:INR | null, ... }` — column count is data-dependent (depends on how many distinct quarters exist in the data)
+- Output columns: **NOT statically known** — this is the one exception in the algebra. Acknowledged; cardinality guard needed.
+
+**Cardinality guard:** `quarterOf` produces at most 4 distinct values. The pivot column explosion risk here is low. The guard fires at, say, 50 distinct values.
+
+---
+
+### Q7 · "weekly order count, last 8 weeks"
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": { "gte": ["order_date", "2025-01-20"] }
+    },
+    {
+      "op": "derive",
+      "as": "week",
+      "expr": { "weekOf": "order_date" }
+    },
+    {
+      "op": "aggregate",
+      "groupBy": ["week"],
+      "measures": [{ "fn": "count", "of": "*", "as": "order_count" }]
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "week", "dir": "asc" }]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Note:** "last 8 weeks" requires a relative date anchor. The planner resolves this to a literal date at plan-generation time (today minus 56 days). The IR carries only literal comparisons — there are no `dateAdd`/`dateNow` expressions in v1. This is a deliberate scope boundary: relative dates are resolved at planning time, not expressed in the IR.
+
+**Week-over-week delta** (growth rate) is **not** expressible in this IR — it would require a window function or a self-join (both rejected). The user gets the weekly time series; the delta they'd have to eyeball.
+
+---
+
+### Q8 · "top 5 products by revenue"
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": { "ne": ["status", "returned"] }
+    },
+    {
+      "op": "aggregate",
+      "groupBy": ["product_name"],
+      "measures": [{ "fn": "sum", "of": "amount", "as": "revenue" }]
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "revenue", "dir": "desc" }]
+    },
+    {
+      "op": "limit",
+      "n": 5
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Type trace:**
+- After `aggregate`: `{ product_name: string, revenue: currency:INR }`
+- After `sort`: same type
+- After `limit`: same type, at most 5 rows
+- `limit` is shape-preserving; output columns statically known ✓
+
+**`limit` is in the v1 set.** See `ir-decisions.md` for rationale.
+
+---
+
+### Q9 · "revenue share by region as a percentage of total"
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": { "ne": ["status", "returned"] }
+    },
+    {
+      "op": "aggregate",
+      "groupBy": ["region"],
+      "measures": [{ "fn": "sum", "of": "amount", "as": "revenue" }]
+    },
+    {
+      "op": "derive",
+      "as": "revenue_share",
+      "expr": {
+        "pct": ["revenue", { "fn": "sumAll", "of": "revenue" }]
+      }
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "revenue_share", "dir": "desc" }]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Design tension:** `pct` needs the total across all rows, not just the current row. This requires `sumAll` — a whole-table reduction used inside a per-row expression. This is a window-function-adjacent operation.
+
+**Resolution:** `sumAll(col)` is a special aggregate reference available inside `derive` steps that follow an `aggregate` step. It references the grand total of a measure column computed in the preceding aggregate. It is **not** a general window function — it is a single, narrow escape for the percentage-of-total pattern. Added to the derive expression set with this restriction documented explicitly. See `ir-decisions.md`.
+
+**Type trace:**
+- After `aggregate`: `{ region: categorical(6), revenue: currency:INR }`
+- After `derive`: `+ { revenue_share: percent }` — `pct(currency:INR, currency:INR)` → `percent` ✓
+
+---
+
+### Q10 · "return rate by product category"
+
+Return rate = returned orders / total orders, per category.
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "aggregate",
+      "groupBy": ["product_category"],
+      "measures": [
+        { "fn": "count", "of": "*", "as": "total_orders" },
+        { "fn": "countIf", "of": "*", "where": { "eq": ["status", "returned"] }, "as": "returned_orders" }
+      ]
+    },
+    {
+      "op": "derive",
+      "as": "return_rate",
+      "expr": { "pct": ["returned_orders", "total_orders"] }
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "return_rate", "dir": "desc" }]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**`countIf` is in the v1 aggregate set.** It is `count(*) WHERE predicate` — a conditional count, equivalent to `sum(case when p then 1 else 0)`. It avoids requiring a self-join or subquery for the denominator. See `ir-decisions.md`.
+
+**Type trace:**
+- After `aggregate`: `{ product_category: categorical(5), total_orders: number, returned_orders: number }`
+- After `derive`: `+ { return_rate: percent }` — `pct(number, number)` → `percent` ✓
+
+---
+
+### Q11 · "revenue this quarter vs last quarter by region"
+
+```json
+{
+  "source": { "ref": "Orders" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": { "ne": ["status", "returned"] }
+    },
+    {
+      "op": "periodCompare",
+      "metric": "Revenue",
+      "timeDim": "order_date",
+      "grain": "quarter",
+      "current": "2025-Q1",
+      "prior": "2024-Q4",
+      "groupBy": ["region"]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Output columns (statically known):**
+`{ region: categorical(6), current_revenue: currency:INR, prior_revenue: currency:INR | null, delta: currency:INR | null, delta_pct: percent | null }`
+
+Prior columns are nullable because a region may have existed in the current period but not in the prior period.
+
+**`periodCompare` is first-class, not syntactic sugar.** The equivalent using filter + aggregate twice + join would require a self-join (not available), and would still not handle the semantics of what "Q1" means under different week-start conventions, or how to treat a region with zero prior-period revenue. See `ir-decisions.md`.
+
+---
+
+### Q12 · "actual vs budgeted spend by category for Jan–Apr 2025"
+
+```json
+{
+  "source": { "ref": "Budget" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": {
+        "and": [
+          { "eq": ["year", 2025] },
+          { "in": ["month", ["Jan", "Feb", "Mar", "Apr"]] }
+        ]
+      }
+    },
+    {
+      "op": "aggregate",
+      "groupBy": ["category"],
+      "measures": [
+        { "fn": "sum", "of": "budgeted_amount", "as": "budgeted" },
+        { "fn": "sum", "of": "actual_amount", "as": "actual" }
+      ]
+    },
+    {
+      "op": "derive",
+      "as": "variance",
+      "expr": { "sub": ["actual", "budgeted"] }
+    },
+    {
+      "op": "derive",
+      "as": "variance_pct",
+      "expr": { "pct": ["variance", "budgeted"] }
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "variance_pct", "dir": "desc" }]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Type trace:**
+- After `aggregate`: `{ category: categorical(4), budgeted: currency:INR, actual: currency:INR }`
+- After first `derive`: `+ { variance: currency:INR }` — `sub(currency:INR, currency:INR)` → `currency:INR` ✓
+- After second `derive`: `+ { variance_pct: percent }` — `pct(currency:INR, currency:INR)` → `percent` ✓
+
+---
+
+### Q13 · "effort hours by assignee, for incomplete tasks"
+
+```json
+{
+  "source": { "ref": "Tasks" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": {
+        "not": { "eq": ["status", "completed"] }
+      }
+    },
+    {
+      "op": "aggregate",
+      "groupBy": ["assignee"],
+      "measures": [{ "fn": "sum", "of": "effort_hours", "as": "remaining_hours" }]
+    },
+    {
+      "op": "sort",
+      "by": [{ "col": "remaining_hours", "dir": "desc" }]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Type trace:**
+- After `filter`: same schema
+- After `aggregate`: `{ assignee: categorical(5), remaining_hours: number }` ✓
+
+---
+
+### Q14 · "overdue tasks by project, sorted by priority"
+
+```json
+{
+  "source": { "ref": "Tasks" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": {
+        "or": [
+          { "eq": ["status", "overdue"] },
+          {
+            "and": [
+              { "ne": ["status", "completed"] },
+              { "lt": ["end_date", "2025-03-28"] }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "op": "sort",
+      "by": [
+        { "col": "project_name", "dir": "asc" },
+        { "col": "priority", "dir": "asc" }
+      ]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**Note:** `priority` is `categorical` with domain `{low, medium, high, critical}`. Sorting by a categorical column requires the evaluator to apply the domain's natural order, not alphabetical. This is a semantic enrichment — the semantic model must declare the priority ordering. The type checker validates that sorting by a `categorical` column is only allowed if the domain has a declared order.
+
+**Type trace:**
+- After `filter`: same schema, fewer rows
+- After `sort`: same type
+- Output shape: the full `Tasks` schema, filtered and sorted ✓
+
+---
+
+### Q15 · "inventory items below reorder level, by warehouse"
+
+```json
+{
+  "source": { "ref": "Inventory" },
+  "steps": [
+    {
+      "op": "filter",
+      "predicate": { "lt": ["qty_on_hand", { "col": "reorder_level" }] }
+    },
+    {
+      "op": "sort",
+      "by": [
+        { "col": "warehouse", "dir": "asc" },
+        { "col": "qty_on_hand", "dir": "asc" }
+      ]
+    }
+  ],
+  "sink": { "mode": "newSheet", "name": "Analysis", "anchor": "A1" }
+}
+```
+
+**New predicate form:** `{ "lt": ["qty_on_hand", { "col": "reorder_level" }] }` — comparing one column to another column, not a literal. Both operands are `number`; comparison is valid. The predicate grammar must support `{ "col": colName }` as a value reference alongside literal values.
+
+**Type trace:**
+- After `filter`: same schema, only rows where `qty_on_hand < reorder_level`
+- After `sort`: same type ✓
+
+---
+
+## Questions 16–20 (scope boundaries)
+
+---
+
+### Q16 · "running total of revenue by week"
+
+**Expressible:** NO
+
+**Scope boundary:** cumulative aggregation.
+
+This requires a window function: for each row in the weekly time series, the value is the sum of all preceding rows. The closed algebra has no window operators. Expressing it requires either:
+- A `window` operator with `rowsBetween(unboundedPreceding, currentRow)` semantics — a general escape hatch that cannot be statically typed easily and opens the door to arbitrary windowed expressions
+- A self-join on the aggregated weekly table — `join` requires an approved join edge between entities; a self-join on a derived table is not representable
+
+**Decision:** out of scope for v1. The user gets the weekly time series (Q7 variant); they apply a cumulative sum in Excel themselves. This is a genuine expressiveness gap. Documented as a potential v2 operator with the constraint that it must remain statically typeable.
+
+---
+
+### Q17 · "what's selling well?"
+
+**Expressible:** NO
+
+**Scope boundary:** undefined question.
+
+"Selling well" has at least three defensible interpretations:
+1. Highest revenue (→ Q1 or Q8 variant)
+2. Highest order volume (→ Q3 variant)
+3. Best growth trend vs. prior period (→ requires Q11 variant plus ranking)
+
+Without clarification, any IR produced would encode an assumption the user didn't make. The right response is a structured refusal: "I understood this as a question about Orders, but 'selling well' is ambiguous — did you mean revenue, order count, or growth vs. last period?" and present the three as selectable variants.
+
+**What this reveals about the type system:** the IR cannot encode ambiguity. It must be resolved before a plan is generated. The planner must detect this class of question and route to clarification, not plan generation.
+
+---
+
+### Q18 · "show me this quarter's performance vs target"
+
+**Expressible:** NO
+
+**Scope boundary:** missing entity — no target defined in the semantic model.
+
+The semantic model has no entity or metric representing "target." Even if we assume the user means revenue target, there is no column or table in the corpus that carries target values. The plan cannot reference a column that isn't in the approved semantic model.
+
+The right response is: "I don't have a target metric in your semantic model. Add a target column to the Orders entity or define a Target entity, and I can compare."
+
+**What this reveals:** the semantic model is the *only* vocabulary the planner can reference. Questions about data that isn't modelled are unanswerable by design. This is not a limitation to be worked around — it is the point. The semantic-model approval step (M6) exists precisely to define what's in scope.
+
+---
+
+### Q19 · "which product categories will grow fastest next quarter?"
+
+**Expressible:** NO
+
+**Scope boundary:** forecasting.
+
+This is not a transformation over existing data — it is a prediction over future data. The closed algebra operates on rows that exist. No set of `filter`, `derive`, `aggregate`, `sort`, `limit`, `join`, `pivot`, and `periodCompare` operators produces a prediction.
+
+This question cannot be expressed even if the operator set were significantly extended, because the answer requires a model not available in the IR. It belongs to a fundamentally different class of computation.
+
+The right response is an explicit refusal: "Sheaf answers questions about data you have, not predictions. I can show you category-level growth in Q4 2024 vs Q3 2024 — would that help?"
+
+---
+
+### Q20 · "can you make the results table look nicer with better formatting?"
+
+**Expressible:** NO
+
+**Scope boundary:** presentation, not transformation.
+
+The IR produces data — values and their types. Formatting (cell styles, font sizes, conditional fill, column widths, merged headers) is not a transformation of the data; it is a presentation layer concern. Sheaf writes values. The add-in's chart spec provides a structured rendering hint. Neither is the same as formatting the written cells.
+
+This is an explicit non-goal (README: "Not a chatbot in a task pane"). The right response is a polite explanation that Sheaf doesn't format cells — after writing a result, the user can apply Excel's built-in table styles.
+
+---
+
+## Summary
+
+| # | Question | Expressible | Key operator(s) |
+|---|---|---|---|
+| Q1 | Total revenue by region | ✓ | filter, aggregate, sort |
+| Q2 | Revenue by region excluding returns | ✓ | (same as Q1 — semantic model dedup) |
+| Q3 | Order count by channel | ✓ | aggregate, sort |
+| Q4 | Average order value by region & channel | ✓ | aggregate, sort |
+| Q5 | Monthly revenue 2025 | ✓ | filter, derive, aggregate, sort |
+| Q6 | Quarterly revenue by region, pivoted | ✓ | filter, derive, aggregate, pivot |
+| Q7 | Weekly order count, last 8 weeks | ✓ | filter, derive, aggregate, sort |
+| Q8 | Top 5 products by revenue | ✓ | filter, aggregate, sort, **limit** |
+| Q9 | Revenue share by region (%) | ✓ | filter, aggregate, derive (sumAll) |
+| Q10 | Return rate by product category | ✓ | aggregate (**countIf**), derive |
+| Q11 | Revenue this quarter vs last, by region | ✓ | filter, **periodCompare** |
+| Q12 | Actual vs budgeted spend by category | ✓ | filter, aggregate, derive ×2, sort |
+| Q13 | Effort hours by assignee, incomplete tasks | ✓ | filter, aggregate, sort |
+| Q14 | Overdue tasks by project, by priority | ✓ | filter, sort (ordered categorical) |
+| Q15 | Inventory below reorder level by warehouse | ✓ | filter (col-col compare), sort |
+| Q16 | Running total of revenue by week | ✗ | window function — out of v1 |
+| Q17 | "What's selling well?" | ✗ | undefined question — ambiguous |
+| Q18 | This quarter's performance vs target | ✗ | target entity missing — model gap |
+| Q19 | Fastest-growing categories next quarter | ✗ | forecasting — wrong class entirely |
+| Q20 | Make the results table look nicer | ✗ | formatting — not a transformation |
