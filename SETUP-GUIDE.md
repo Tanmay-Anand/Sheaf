@@ -32,7 +32,7 @@ Sheaf/
 ├── corpus/          # Six CSV fixtures + questions.md — M-0 design corpus
 ├── docs/            # ir-spec.md, diagnostics.md
 ├── contract/        # Generated artefacts (committed snapshot)
-│   ├── schema/      #   plan, unbound-plan, planner-response, commit-request, catalog (.schema.json) — written by Maven
+│   ├── schema/      #   plan, unbound-plan, planner-response, commit-request, check-report, catalog (.schema.json) — written by Maven
 │   └── types/       #   the matching .d.ts files — written by npm
 ├── service/         # Spring Boot 3.3 / Java 21 backend
 └── addin/           # React 18 / Fluent UI v9 Office Add-in
@@ -49,7 +49,7 @@ cd service
 mvn --batch-mode verify
 ```
 
-This compiles the Java IR and catalog types, runs the tests (ArchUnit layering rules, MockMvc endpoint tests, the type checker's golden tests over `corpus/plans/`, 67 invalid plans, binder and consent tests, and jqwik property tests), and generates the five contract schemas in `contract/schema/` at the `prepare-package` phase.
+This compiles the Java IR and catalog types, runs the tests (ArchUnit layering rules, MockMvc endpoint tests, the type checker's golden tests over `corpus/plans/`, 67 invalid plans, binder, consent and check-endpoint tests, and jqwik property tests), and generates the six contract schemas in `contract/schema/` at the `prepare-package` phase.
 
 Every record component is `required` in the generated schema unless it is annotated `@Nullable` (`com.sheaf.domain.common.Nullable`). That is what makes the generated TypeScript types strict.
 
@@ -183,7 +183,14 @@ npm run start:web
 
 The pane opens on the **Workbook** tab. **Scan workbook** reads every sheet and builds the catalog: tables, columns, inferred types, what depends on each column, and possible links between tables. The catalog is saved inside the workbook as a custom XML part and sent to `POST /api/catalog`, which rejects anything that could carry rows. Change a type in the dropdown to correct it; the correction is kept across rescans.
 
+The **Run** tab (M4) takes a plan pasted as JSON, in the unbound format of `docs/ir-spec.md` §1.1. **Example** fills in a plan for the first table found. **Check** sends the plan and the catalog to `POST /api/check`, which binds and type-checks it; errors come back with a JSON Pointer and a repair hint. **Preview** rescans the workbook and evaluates the plan in the pane. It shows the exact extent, the first rows, and every issue (error cells, numbers stored as text…). **Commit** writes exactly that result, as one undo step. It refuses if anything the preview read has changed since. A plan with `"sink": {"mode": "anchor"}` writes into an existing sheet at the cell you select (**Use the selected cell**).
+
 The **Ask** tab calls `/api/plan`, which still returns the hardcoded Q1 plan until the planner lands in M5.
+
+**To check by hand in Excel (M4):**
+1. Commit a plan, then press Ctrl+Z once: the whole result should disappear.
+2. Preview a plan, edit one of its source cells, then Commit: it should refuse with "changed since the preview".
+3. Commit into a cell that already holds data: the preview should say how many cells will be replaced.
 
 ---
 

@@ -234,7 +234,7 @@ SortKey := {
 **Constraints:**
 - Each `col` must exist in `T`.
 - Sorting a `categorical<D>` column depends on the domain's ordering (§5.1). **Nominal** domains (regions, names) sort alphabetically. **Declared** ordinal domains (priority: low, medium, high, critical) sort in their declared order. A domain the semantic model marks ordinal **without** a declared order is refused with `E_SORT_CATEGORICAL_UNORDERED`, because sorting it alphabetically would be silently wrong (high < low < medium). *(v1.1: v1 refused every unordered categorical, which contradicted corpus Q4 and Q14.)*
-- Sorting by a nullable column places nulls last (ascending) or nulls first (descending). This is not configurable in v1.
+- Blanks sort last in both directions, as in Excel (v1.2, M4; v1 put them first when descending). Values sort by type, then value: numbers and dates, then text, then FALSE and TRUE, then errors (descending reverses the types, not the blanks). Text ignores case, and ignores hyphens and apostrophes except to order two otherwise equal strings (the one with the hyphen last). See §9.
 
 ---
 
@@ -719,3 +719,54 @@ Plans travel as the tagged JSON the generated contract schemas describe (`unboun
 **Parsing** rejects unknown fields and variants instead of ignoring them (`E_PARSE_UNKNOWN_FIELD`, with the allowed fields as candidates; `E_PARSE_UNKNOWN_VARIANT`; `E_PARSE_INVALID_VALUE`). A required field that is absent is `E_PARSE_MISSING_FIELD`, numbers included: numeric fields are boxed, so an absent `limit.n` is reported, never read as 0 (v1.2). A `case` without `else` is `E_CASE_NO_ELSE`. Text that isn't JSON is `E_PARSE_INVALID_JSON`. A location (`range`) or consent (`onDependents`) written into an unbound plan is `E_PARSE_UNKNOWN_FIELD`.
 
 **Diagnostics (v1.2)** carry a JSON Pointer to the offending field (`/steps/0/predicate/left/col`), the step index and operator, a message and a repair hint, and context: `received`, `expected`/`actual`, and for unknown names up to five `candidates`, closest first. See `docs/diagnostics.md`.
+
+---
+
+## 9. Evaluation and commit *(v1.2, M4)*
+
+The evaluator (`addin/src/engine/`) is a pure function `(bound plan, tables, options) → { table, issues }`. The preview is computed from its result; the committer writes exactly that result. These are the runtime rules the type system leaves open.
+
+### 9.1 Loading cells
+
+Each column is read as its catalogued kind:
+
+- Numeric columns take numbers. A number stored as text (`"1,299"`, `"₹4,398"`, `"$5196"`) is read as the number it shows and counted in the preview, because Excel's own `SUM` would skip it.
+- Date columns take real Excel dates, converted with the workbook's date system, and text dates in every format the catalog recognises. Digits-only dates follow the column's day-first or month-first evidence; one that stays ambiguous is not guessed.
+- Text columns take text; a number in one is its displayed digits.
+- `#N/A`, `#DIV/0!` and the other error codes are error values. Blank and all-space cells are null.
+- A cell that doesn't fit its column's type (text in a number column) becomes `#VALUE!`, so the error policy covers it instead of the value vanishing.
+
+### 9.2 Values and comparisons
+
+- Text compares ignoring case, as Excel's `=` does (`"North" = "north"`). The same applies to grouping keys, join and lookup keys, `in` lists and `countDistinct`. A group shows the first spelling it met.
+- A blank equals only a blank. `ne(status, "returned")` keeps blank statuses. A blank never satisfies `<`, `<=`, `>` or `>=`.
+- Arithmetic on a null is null (Excel would read the blank as 0). Division by zero is `#DIV/0!`.
+- An error value propagates through expressions as in Excel. In a condition it makes the condition **unknown**, and unknown never selects a row: neither `gt(v, 0)` nor `not(gt(v, 0))` matches a row whose `v` is `#N/A`.
+- Text functions: `concat` treats a null part as empty and is null only when every part is; `skipNulls` drops blank parts with their separator. Numbers show with up to 15 significant digits, dates as ISO `yyyy-mm-dd`, booleans as `TRUE`/`FALSE`. `trim` is Excel's (inner runs of spaces collapse). `splitPart` is 1-based and null past the end. `toText` rounds half away from zero.
+
+### 9.3 Operators
+
+- `aggregate` skips blanks. A group whose values are all blank sums to null, and a measure with `where` that matches no row in the group is null. `count` counts non-blank values. Groups appear in first-seen order; add a `sort` for another order.
+- `pivot` sums into cells. Its column headers are the distinct values in Excel's ascending sort order (a blank one is `(blank)`), and a cell with no rows is null.
+- `join` and `lookup`: a blank or error key matches nothing. A `lookup` whose right key repeats in the data (though the catalog said unique) is a blocking issue.
+- `periodCompare` names its columns `current_<metric>`, `prior_<metric>`, `delta` and `delta_pct`, with the metric name lower-cased and non-alphanumerics made `_`. `delta_pct` is null when the prior value is null or 0.
+
+### 9.4 Issues
+
+The preview lists issues. A **blocking** issue stops the commit.
+
+| Issue | Blocking | When |
+|---|---|---|
+| Error cells | yes, until the user chooses to leave them out | An aggregate, pivot, condition or key meets an error value; the count and the columns are given. Leaving them out skips those values in aggregates and those rows in conditions. |
+| Lookup key not unique | yes | §9.3 |
+| Overwrites the source | yes | An anchor sink's extent overlaps a table the plan reads. |
+| Overwrites a table | no | An anchor sink's extent overlaps another catalogued table. |
+| Errors in the result, numbers stored as text, unreadable cells, date system not confirmed | no | Stated so the user knows. |
+
+### 9.5 Commit
+
+- **Check, then preview.** `POST /api/check` parses, binds and checks a plan against the pane's catalog and returns `{ valid, envelope, planHash, output, dynamicValue, diagnostics, impact }` (`contract/schema/check-report.schema.json`). The preview rescans the workbook, refuses if the entities or columns the plan was bound to are gone, and evaluates.
+- **Extent.** The preview states the exact rows × columns and the target range. A `newSheet` sink writes only to a sheet the commit creates, and refuses if a sheet of that name appeared meanwhile. An `anchor` sink writes exactly that extent from the cell the user chose, and the preview says how many non-empty cells it replaces.
+- **Guard.** At commit, every source region, and the anchor target, is re-read and re-hashed. Any difference from the preview refuses the commit ("changed since the preview").
+- **Cells.** Text goes into text-formatted (`@`) cells, so `=…`, `007` and `1-2` are written as typed. Dates are written as serials in the workbook's date system, with a date format. Currency, percent and date columns get number formats from their checked types.
+- **Payload and undo.** Writes are chunked (at most 20,000 cells per request) and grouped into one undo step (`mergeUndoGroup`, ExcelApi 1.20). Where that API is missing, the preview says how many undo steps the commit takes. The committer never calls an API that clears the undo stack.

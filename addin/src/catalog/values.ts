@@ -123,6 +123,62 @@ export function parseDate(s: string): Parsed | null {
   return null;
 }
 
+export interface DateParts {
+  y: number;
+  m: number;
+  d: number;
+  /** Fraction of a day, for datetimes. */
+  time: number;
+}
+
+/**
+ * The calendar date a text cell holds, in exactly the formats parseDate recognises. Digits-only
+ * dates are ambiguous; `dayFirst` settles them (from the column's evidence), and when it is
+ * undefined only unambiguous ones (13/01/2025) are read. Null when the text is not a date.
+ */
+export function dateFromText(s: string, dayFirst?: boolean): DateParts | null {
+  const t = s.trim();
+  const ok = (y: number, m: number, d: number, time = 0): DateParts | null => {
+    if (!validYmd(y, m, d)) return null;
+    const probe = new Date(Date.UTC(y, m - 1, d));
+    return probe.getUTCMonth() === m - 1 ? { y, m, d, time } : null; // rejects 31 February
+  };
+  let m = ISO_DATE.exec(t);
+  if (m) return ok(+m[1]!, +m[2]!, +m[3]!);
+  m = ISO_DATETIME.exec(t);
+  if (m) {
+    const [hh, mm] = [+m[4]!, +m[5]!];
+    return hh < 24 && mm < 60 ? ok(+m[1]!, +m[2]!, +m[3]!, (hh * 60 + mm) / 1440) : null;
+  }
+  m = YMD_SLASH.exec(t);
+  if (m) return ok(+m[1]!, +m[2]!, +m[3]!);
+  m = NUMERIC_DATE.exec(t);
+  if (m) {
+    const a = +m[1]!;
+    const b = +m[3]!;
+    const y = yearFrom(m[4]!);
+    const first = dayFirst ?? (a > 12 ? true : b > 12 ? false : undefined);
+    if (first === undefined) return null;
+    return first ? ok(y, b, a) : ok(y, a, b);
+  }
+  m = MONTH_D_Y.exec(t);
+  if (m) {
+    const mon = MONTHS[m[1]!.toLowerCase()];
+    return mon ? ok(+m[3]!, mon, +m[2]!) : null;
+  }
+  m = D_MONTH_Y.exec(t);
+  if (m) {
+    const mon = MONTHS[m[2]!.toLowerCase()];
+    return mon ? ok(yearFrom(m[3]!), mon, +m[1]!) : null;
+  }
+  m = Y_MONTH_D.exec(t);
+  if (m) {
+    const mon = MONTHS[m[2]!.toLowerCase()];
+    return mon ? ok(+m[1]!, mon, +m[3]!) : null;
+  }
+  return null;
+}
+
 export type FormatClass =
   | { kind: "general" | "number" | "percent" | "text" | "date" | "datetime" }
   | { kind: "currency"; unit: string };
