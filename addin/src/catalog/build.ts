@@ -61,7 +61,8 @@ function formatAt(sheet: SheetSnapshot, row: number, col: number): string | unde
   return sheet.numberFormats?.[row - sheet.originRow]?.[col - sheet.originCol];
 }
 
-function hashBox(sheet: SheetSnapshot, box: Box): string {
+/** Content hash of a box: formulas where there are any, values otherwise. The commit guard re-hashes with it. */
+export function hashBox(sheet: SheetSnapshot, box: Box): string {
   const parts: string[] = [];
   for (let r = box.top; r <= box.bottom; r++) {
     const row: string[] = [];

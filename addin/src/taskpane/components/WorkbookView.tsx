@@ -28,7 +28,6 @@ import type {
 } from "@sheaf/contract/catalog";
 import { buildCatalog } from "../../catalog/build";
 import { staleEntities } from "../../catalog/persist";
-import type { WorkbookSnapshot } from "../../catalog/types";
 import { submitCatalog, type CatalogSummary } from "../../api/catalogClient";
 import {
   type ChangeWatch,
@@ -39,6 +38,7 @@ import {
   setExemplarsSetting,
   watchChanges,
 } from "../../excel/catalog";
+import { useWorkbook } from "../workbookContext";
 
 const KINDS: ScalarKind[] = ["string", "categorical", "number", "currency", "percent", "date", "datetime", "boolean", "empty"];
 
@@ -121,8 +121,7 @@ function ColumnRow({
 
 export default function WorkbookView() {
   const styles = useStyles();
-  const [catalog, setCatalog] = useState<WorkbookCatalog | null>(null);
-  const [snapshot, setSnapshot] = useState<WorkbookSnapshot | null>(null);
+  const { catalog, setCatalog, snapshot, setSnapshot } = useWorkbook();
   const [exemplars, setExemplars] = useState<boolean>(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

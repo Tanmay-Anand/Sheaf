@@ -19,7 +19,8 @@
       "@sheaf/contract/catalog": ["../contract/types/catalog.d.ts"],
       "@sheaf/contract/unbound": ["../contract/types/unbound-plan.d.ts"],
       "@sheaf/contract/response": ["../contract/types/planner-response.d.ts"],
-      "@sheaf/contract/commit": ["../contract/types/commit-request.d.ts"]
+      "@sheaf/contract/commit": ["../contract/types/commit-request.d.ts"],
+      "@sheaf/contract/check": ["../contract/types/check-report.d.ts"]
     },
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

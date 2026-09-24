@@ -12,6 +12,7 @@ Generated artifacts that keep the Java IR and TypeScript types in sync.
 | `schema/planner-response.schema.json` | same | same |
 | `schema/plan.schema.json` | same | same |
 | `schema/commit-request.schema.json` | same | same |
+| `schema/check-report.schema.json` | same | same |
 | `schema/catalog.schema.json` | same | same |
 | `types/*.d.ts` (one per schema) | npm scripts in `addin/` | `cd addin && npm run generate-types` |
 
@@ -21,9 +22,10 @@ Generated artifacts that keep the Java IR and TypeScript types in sync.
 | `planner-response` | `PlannerResponse` | the model's whole answer: plan, clarify or refuse, with annotations |
 | `plan` | `PlanEnvelope` | the binder: `{ irVersion, plan }` with bindings and a concrete sink; its canonical JSON is what `planHash` hashes |
 | `commit-request` | `CommitRequest` | the user, through the pane: plan hash, anchor, consent, parameter values |
+| `check-report` | `CheckReport` | the service, answering `POST /api/check`: bound envelope, hash, output types, diagnostics, impact |
 | `catalog` | `WorkbookCatalog` | the pane: what it knows about the workbook (schema and statistics, never rows) |
 
-In the add-in they are imported as `@sheaf/contract`, `@sheaf/contract/unbound`, `@sheaf/contract/response`, `@sheaf/contract/commit` and `@sheaf/contract/catalog`.
+In the add-in they are imported as `@sheaf/contract`, `@sheaf/contract/unbound`, `@sheaf/contract/response`, `@sheaf/contract/commit`, `@sheaf/contract/check` and `@sheaf/contract/catalog`.
 
 Every record component is required unless annotated `@Nullable`; every domain type carries its class name as `title`, which becomes the TypeScript interface name.
 

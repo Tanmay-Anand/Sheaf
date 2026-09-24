@@ -25,6 +25,7 @@ module.exports = async (env, options) => {
         "@sheaf/contract/unbound$": path.resolve(__dirname, "../contract/types/unbound-plan.d.ts"),
         "@sheaf/contract/response$": path.resolve(__dirname, "../contract/types/planner-response.d.ts"),
         "@sheaf/contract/commit$": path.resolve(__dirname, "../contract/types/commit-request.d.ts"),
+        "@sheaf/contract/check$": path.resolve(__dirname, "../contract/types/check-report.d.ts"),
       },
     },
     module: {

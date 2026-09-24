@@ -11,6 +11,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
+import com.sheaf.application.CheckReport;
 import com.sheaf.domain.catalog.WorkbookCatalog;
 import com.sheaf.domain.common.Nullable;
 import com.sheaf.domain.commit.CommitRequest;
@@ -39,13 +40,15 @@ public class SchemaGeneratorMain {
     /**
      * Every contract document, by file name. The unbound plan and the planner response are what a
      * model may write; the envelope (bound plan) is what is stored and run; the commit request is what
-     * the user decides; the catalog is what the pane knows about the workbook.
+     * the user decides; the check report is what the service answers when it checks a plan; the
+     * catalog is what the pane knows about the workbook.
      */
     private static final Map<String, Class<?>> ROOTS = Map.of(
             "plan.schema.json", PlanEnvelope.class,
             "unbound-plan.schema.json", UnboundPlan.class,
             "planner-response.schema.json", PlannerResponse.class,
             "commit-request.schema.json", CommitRequest.class,
+            "check-report.schema.json", CheckReport.class,
             "catalog.schema.json", WorkbookCatalog.class
     );
 
