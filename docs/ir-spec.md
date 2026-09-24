@@ -1,6 +1,6 @@
 # Sheaf IR — Specification v1
 
-**Status:** frozen at M0. Changes after this point require a written rationale in `ir-decisions.md` and a version bump.
+**Status:** frozen at M0. Changes after this point require a written design rationale and a version bump.
 
 ---
 

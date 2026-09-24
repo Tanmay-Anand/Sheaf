@@ -32,3 +32,6 @@ npm-debug.log*
 
 # ── Maven wrapper (if added later) ────────────────────────────────────────────
 .mvn/wrapper/maven-wrapper.jar
+
+# Private working docs
+Inside-docs/
