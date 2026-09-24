@@ -7,7 +7,10 @@ import java.util.List;
 /**
  * A rectangular block of tabular data: an Excel Table, or a region the profiler detected.
  *
- * @param name          Stable, workbook-unique name (table name, or the sheet name for a region).
+ * @param id            Stable id: {@code t:<Excel table id>} for Tables, {@code r:<worksheet id>:<header anchor>}
+ *                      for regions. Carried over across rescans while the headers stay recognisable.
+ * @param name          Workbook-unique display name (table name, or the sheet name for a region).
+ * @param sheetId       Excel's worksheet id; survives sheet renames.
  * @param address       Full address including the header row, e.g. {@code Sales!A3:I23}.
  * @param headerRow     1-based sheet row of the (last) header row.
  * @param headerRows    Number of header rows; 2 when a merged group row sits above the labels.
@@ -19,8 +22,10 @@ import java.util.List;
  * @param tableName     The Excel Table name when {@code kind} is {@code table}.
  */
 public record CatalogEntity(
+        String id,
         String name,
         EntityKind kind,
+        String sheetId,
         String sheet,
         String address,
         int headerRow,

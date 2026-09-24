@@ -1,0 +1,1886 @@
+[
+  {
+    "name": "unknown source",
+    "expect": "E_UNKNOWN_SOURCE",
+    "plan": {
+      "kind": "query",
+      "source": "Order",
+      "steps": [
+        {
+          "op": "filter",
+          "predicate": {
+            "op": "ne",
+            "left": {
+              "type": "col",
+              "col": "status"
+            },
+            "right": {
+              "type": "lit",
+              "value": "returned"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "typo in column",
+    "expect": "E_UNKNOWN_COLUMN",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "filter",
+          "predicate": {
+            "op": "ne",
+            "left": {
+              "type": "col",
+              "col": "stauts"
+            },
+            "right": {
+              "type": "lit",
+              "value": "returned"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "column gone after aggregate",
+    "expect": "E_COLUMN_NOT_IN_OUTPUT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupBy": [
+            "region"
+          ],
+          "measures": [
+            {
+              "fn": "sum",
+              "of": "amount",
+              "as": "revenue"
+            }
+          ]
+        },
+        {
+          "op": "sort",
+          "by": [
+            {
+              "col": "amount",
+              "dir": "desc"
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "derive over an existing name, differing only in case",
+    "expect": "E_DERIVE_COLUMN_COLLISION",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "derive",
+          "as": "Amount",
+          "expr": {
+            "type": "col",
+            "col": "unit_price"
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "measure named like group, differing only in case",
+    "expect": "E_DUPLICATE_OUTPUT_COLUMN",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupBy": [
+            "region"
+          ],
+          "measures": [
+            {
+              "fn": "count",
+              "of": "*",
+              "as": "Region"
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "groupBy typo",
+    "expect": "E_AGGREGATE_GROUPBY_UNKNOWN",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupBy": [
+            "chnl"
+          ],
+          "measures": [
+            {
+              "fn": "count",
+              "of": "*",
+              "as": "n"
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "sum of a category",
+    "expect": "E_TYPE_MISMATCH",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupBy": [
+            "channel"
+          ],
+          "measures": [
+            {
+              "fn": "sum",
+              "of": "region",
+              "as": "x"
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "currency compared with text",
+    "expect": "E_TYPE_INCOMPARABLE",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "filter",
+          "predicate": {
+            "op": "eq",
+            "left": {
+              "type": "col",
+              "col": "amount"
+            },
+            "right": {
+              "type": "lit",
+              "value": "high"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "a date written as plain text",
+    "expect": "E_TYPE_INCOMPARABLE",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "filter",
+          "predicate": {
+            "op": "gte",
+            "left": {
+              "type": "col",
+              "col": "order_date"
+            },
+            "right": {
+              "type": "lit",
+              "value": "2025-01-01"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "an impossible date literal",
+    "expect": "E_INVALID_ARGUMENT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "filter",
+          "predicate": {
+            "op": "gte",
+            "left": {
+              "type": "col",
+              "col": "order_date"
+            },
+            "right": {
+              "type": "lit",
+              "value": "2025-13-01",
+              "valueType": "date"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "mixing currencies",
+    "expect": "E_CURRENCY_UNIT_MISMATCH",
+    "plan": {
+      "kind": "query",
+      "source": "Fx",
+      "steps": [
+        {
+          "op": "derive",
+          "as": "total",
+          "expr": {
+            "type": "add",
+            "a": {
+              "type": "col",
+              "col": "amount_inr"
+            },
+            "b": {
+              "type": "col",
+              "col": "amount_usd"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "less-than on a nominal category",
+    "expect": "E_ORDER_COMPARISON_NON_ORDERED",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "filter",
+          "predicate": {
+            "op": "lt",
+            "left": {
+              "type": "col",
+              "col": "region"
+            },
+            "right": {
+              "type": "lit",
+              "value": "North"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "empty in-list",
+    "expect": "E_INVALID_ARGUMENT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "filter",
+          "predicate": {
+            "op": "in",
+            "col": "region",
+            "values": []
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "month of a text column",
+    "expect": "E_DATE_EXTRACT_NON_DATE",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "derive",
+          "as": "m",
+          "expr": {
+            "type": "monthOf",
+            "col": "region"
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "bad toText pattern",
+    "expect": "E_INVALID_ARGUMENT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "project",
+          "columns": [
+            {
+              "as": "d",
+              "expr": {
+                "type": "concat",
+                "parts": [
+                  {
+                    "type": "toText",
+                    "arg": {
+                      "type": "col",
+                      "col": "order_date"
+                    },
+                    "pattern": "dddd"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "toText outside a concat",
+    "expect": "E_TOTEXT_OUTSIDE_CONCAT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "derive",
+          "as": "amount_text",
+          "expr": {
+            "type": "toText",
+            "arg": {
+              "type": "col",
+              "col": "amount"
+            },
+            "pattern": "#,##0"
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "toText into a new sheet",
+    "expect": "E_TOTEXT_OUTSIDE_CONCAT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "project",
+          "columns": [
+            {
+              "as": "when",
+              "expr": {
+                "type": "toText",
+                "arg": {
+                  "type": "col",
+                  "col": "order_date"
+                },
+                "pattern": "yyyy-mm"
+              }
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "upper of a number",
+    "expect": "E_TYPE_MISMATCH",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "derive",
+          "as": "u",
+          "expr": {
+            "type": "upper",
+            "arg": {
+              "type": "col",
+              "col": "amount"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "undeclared parameter",
+    "expect": "E_UNKNOWN_PARAM",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "filter",
+          "predicate": {
+            "op": "gte",
+            "left": {
+              "type": "col",
+              "col": "order_date"
+            },
+            "right": {
+              "type": "param",
+              "name": "asOf"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "unknown metric",
+    "expect": "E_UNKNOWN_METRIC",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "periodCompare",
+          "metric": "Profit",
+          "timeDim": "order_date",
+          "grain": "quarter",
+          "current": "2025-Q1",
+          "prior": "2024-Q4"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "unknown time dimension",
+    "expect": "E_PERIOD_COMPARE_NO_TIME_DIM",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "periodCompare",
+          "metric": "Revenue",
+          "timeDim": "ship_date",
+          "grain": "quarter",
+          "current": "2025-Q1",
+          "prior": "2024-Q4"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "grain not supported",
+    "expect": "E_PERIOD_COMPARE_UNSUPPORTED_GRAIN",
+    "plan": {
+      "kind": "query",
+      "source": "Tasks",
+      "steps": [
+        {
+          "op": "periodCompare",
+          "metric": "EffortHours",
+          "timeDim": "task_end_date",
+          "grain": "year",
+          "current": "2025",
+          "prior": "2024"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "quarter 5",
+    "expect": "E_PERIOD_COMPARE_INVALID_PERIOD",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "periodCompare",
+          "metric": "Revenue",
+          "timeDim": "order_date",
+          "grain": "quarter",
+          "current": "2025-Q5",
+          "prior": "2025-Q4"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "periodCompare after derive",
+    "expect": "E_PERIOD_COMPARE_PLACEMENT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "derive",
+          "as": "m",
+          "expr": {
+            "type": "monthOf",
+            "col": "order_date"
+          }
+        },
+        {
+          "op": "periodCompare",
+          "metric": "Revenue",
+          "timeDim": "order_date",
+          "grain": "quarter",
+          "current": "2025-Q1",
+          "prior": "2024-Q4"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "join on an undeclared path",
+    "expect": "E_UNAPPROVED_JOIN",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "join",
+          "with": "Regions",
+          "on": {
+            "left": "region",
+            "right": "zone"
+          },
+          "kind": "inner"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "join on a proposed, unapproved path",
+    "expect": "E_UNAPPROVED_JOIN",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "join",
+          "with": "Inventory",
+          "on": {
+            "left": "product_category",
+            "right": "category"
+          },
+          "kind": "inner"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "join to unknown table",
+    "expect": "E_JOIN_ENTITY_UNKNOWN",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "join",
+          "with": "Region",
+          "on": {
+            "left": "region",
+            "right": "code"
+          },
+          "kind": "inner"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "lookup on a key that repeats",
+    "expect": "E_LOOKUP_KEY_NOT_UNIQUE",
+    "plan": {
+      "kind": "query",
+      "source": "Tasks",
+      "steps": [
+        {
+          "op": "lookup",
+          "with": "Budget",
+          "on": {
+            "left": "assignee",
+            "right": "owner"
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "lookup of a column that isn't there",
+    "expect": "E_UNKNOWN_COLUMN",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "lookup",
+          "with": "Regions",
+          "on": {
+            "left": "region",
+            "right": "code"
+          },
+          "take": [
+            "region_nme"
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "pivot text values",
+    "expect": "E_PIVOT_VALUE_NOT_NUMERIC",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "pivot",
+          "rows": [
+            "region"
+          ],
+          "cols": "channel",
+          "values": "status"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "pivot on money",
+    "expect": "E_PIVOT_NON_CATEGORICAL_COLS",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "pivot",
+          "rows": [
+            "region"
+          ],
+          "cols": "amount",
+          "values": "quantity"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "pivot on 75 order ids",
+    "expect": "E_PIVOT_HIGH_CARDINALITY",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "pivot",
+          "rows": [
+            "region"
+          ],
+          "cols": "order_id",
+          "values": "amount"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "step after pivot",
+    "expect": "E_PIVOT_NOT_TERMINAL",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "pivot",
+          "rows": [
+            "region"
+          ],
+          "cols": "channel",
+          "values": "amount"
+        },
+        {
+          "op": "sort",
+          "by": [
+            {
+              "col": "region",
+              "dir": "asc"
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "sumAll not after aggregate",
+    "expect": "E_SUMALL_INVALID_PLACEMENT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "filter",
+          "predicate": {
+            "op": "ne",
+            "left": {
+              "type": "col",
+              "col": "status"
+            },
+            "right": {
+              "type": "lit",
+              "value": "returned"
+            }
+          }
+        },
+        {
+          "op": "derive",
+          "as": "s",
+          "expr": {
+            "type": "sumAll",
+            "col": "amount"
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "sumAll of a non-measure",
+    "expect": "E_SUMALL_UNKNOWN_COLUMN",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupBy": [
+            "region"
+          ],
+          "measures": [
+            {
+              "fn": "sum",
+              "of": "amount",
+              "as": "revenue"
+            }
+          ]
+        },
+        {
+          "op": "derive",
+          "as": "s",
+          "expr": {
+            "type": "pct",
+            "numerator": {
+              "type": "col",
+              "col": "revenue"
+            },
+            "denominator": {
+              "type": "sumAll",
+              "col": "amount"
+            }
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "bucket labels count",
+    "expect": "E_BUCKET_BREAK_COUNT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "derive",
+          "as": "size",
+          "expr": {
+            "type": "bucket",
+            "col": "amount",
+            "breaks": [
+              1000,
+              5000
+            ],
+            "labels": [
+              "small",
+              "large"
+            ]
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "case without else",
+    "expect": "E_CASE_NO_ELSE",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "derive",
+          "as": "c",
+          "expr": {
+            "type": "case",
+            "when": [
+              {
+                "if": {
+                  "op": "eq",
+                  "left": {
+                    "type": "col",
+                    "col": "status"
+                  },
+                  "right": {
+                    "type": "lit",
+                    "value": "shipped"
+                  }
+                },
+                "then": {
+                  "type": "lit",
+                  "value": "S"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "sort by an ordinal category with no declared order",
+    "expect": "E_SORT_CATEGORICAL_UNORDERED",
+    "plan": {
+      "kind": "query",
+      "source": "Tasks",
+      "steps": [
+        {
+          "op": "sort",
+          "by": [
+            {
+              "col": "status",
+              "dir": "asc"
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "countIf without predicate",
+    "expect": "E_COUNTIF_NO_PREDICATE",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupBy": [
+            "region"
+          ],
+          "measures": [
+            {
+              "fn": "countIf",
+              "of": "*",
+              "as": "n"
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "limit zero",
+    "expect": "E_LIMIT_NOT_POSITIVE",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "sort",
+          "by": [
+            {
+              "col": "amount",
+              "dir": "desc"
+            }
+          ]
+        },
+        {
+          "op": "limit",
+          "n": 0
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "no steps into an existing sheet",
+    "expect": "E_EMPTY_PIPELINE_WRITE",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [],
+      "sink": {
+        "mode": "anchor"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "unknown template",
+    "expect": "E_TEMPLATE_UNKNOWN",
+    "plan": {
+      "kind": "query",
+      "source": "Contacts",
+      "steps": [
+        {
+          "op": "project",
+          "columns": [
+            {
+              "as": "first_name",
+              "expr": {
+                "type": "col",
+                "col": "first_name"
+              }
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "template",
+        "templateId": "crm"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "unknown operator",
+    "expect": "E_PARSE_UNKNOWN_VARIANT",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "median",
+          "of": "amount"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "unknown aggregate function",
+    "expect": "E_PARSE_INVALID_VALUE",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupBy": [
+            "region"
+          ],
+          "measures": [
+            {
+              "fn": "median",
+              "of": "amount",
+              "as": "x"
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "misspelled field",
+    "expect": "E_PARSE_UNKNOWN_FIELD",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupby": [
+            "region"
+          ],
+          "measures": []
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "missing measures",
+    "expect": "E_PARSE_MISSING_FIELD",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupBy": [
+            "region"
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "limit without n (never read as 0)",
+    "expect": "E_PARSE_MISSING_FIELD",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "sort",
+          "by": [
+            {
+              "col": "amount",
+              "dir": "desc"
+            }
+          ]
+        },
+        {
+          "op": "limit"
+        }
+      ],
+      "sink": {
+        "mode": "newSheet",
+        "name": "Analysis"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "a location written by the model",
+    "expect": "E_PARSE_UNKNOWN_FIELD",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "aggregate",
+          "groupBy": [
+            "region"
+          ],
+          "measures": [
+            {
+              "fn": "sum",
+              "of": "amount",
+              "as": "revenue"
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "anchor",
+        "range": "Summary!A1:C10"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "not JSON",
+    "expect": "E_PARSE_INVALID_JSON",
+    "plan": "Here is the plan: {kind: query}"
+  },
+  {
+    "name": "edit with no operations",
+    "expect": "E_EDIT_EMPTY",
+    "plan": {
+      "kind": "edit",
+      "target": "Contacts",
+      "ops": [],
+      "params": []
+    }
+  },
+  {
+    "name": "edit an unknown table",
+    "expect": "E_UNKNOWN_SOURCE",
+    "plan": {
+      "kind": "edit",
+      "target": "Contact",
+      "ops": [
+        {
+          "op": "dropColumn",
+          "col": "fax"
+        }
+      ],
+      "params": []
+    }
+  },
+  {
+    "name": "drop a column that isn't there",
+    "expect": "E_EDIT_UNKNOWN_COLUMN",
+    "plan": {
+      "kind": "edit",
+      "target": "Contacts",
+      "ops": [
+        {
+          "op": "dropColumn",
+          "col": "fax_number"
+        }
+      ],
+      "params": []
+    }
+  },
+  {
+    "name": "add a column that exists, differing only in case",
+    "expect": "E_EDIT_COLUMN_COLLISION",
+    "plan": {
+      "kind": "edit",
+      "target": "Contacts",
+      "ops": [
+        {
+          "op": "addColumn",
+          "as": "Email",
+          "expr": {
+            "type": "lit",
+            "value": "x"
+          },
+          "position": {
+            "at": "last"
+          }
+        }
+      ],
+      "params": []
+    }
+  },
+  {
+    "name": "rename onto an existing name",
+    "expect": "E_RENAME_COLLISION",
+    "plan": {
+      "kind": "edit",
+      "target": "Contacts",
+      "ops": [
+        {
+          "op": "renameColumn",
+          "col": "phone",
+          "to": "EMAIL"
+        }
+      ],
+      "params": []
+    }
+  },
+  {
+    "name": "drop every column",
+    "expect": "E_EDIT_DROPS_EVERY_COLUMN",
+    "plan": {
+      "kind": "edit",
+      "target": "Regions",
+      "ops": [
+        {
+          "op": "dropColumn",
+          "col": "code"
+        },
+        {
+          "op": "dropColumn",
+          "col": "region_name"
+        },
+        {
+          "op": "dropColumn",
+          "col": "zone"
+        },
+        {
+          "op": "dropColumn",
+          "col": "manager"
+        },
+        {
+          "op": "dropColumn",
+          "col": "hq_city"
+        }
+      ],
+      "params": []
+    }
+  },
+  {
+    "name": "write text into money",
+    "expect": "E_TYPE_MISMATCH",
+    "plan": {
+      "kind": "edit",
+      "target": "Contacts",
+      "ops": [
+        {
+          "op": "setColumn",
+          "col": "lifetime_value",
+          "expr": {
+            "type": "lit",
+            "value": "n/a"
+          }
+        }
+      ],
+      "params": []
+    }
+  },
+  {
+    "name": "move a column after itself",
+    "expect": "E_INVALID_ARGUMENT",
+    "plan": {
+      "kind": "edit",
+      "target": "Contacts",
+      "ops": [
+        {
+          "op": "moveColumn",
+          "col": "email",
+          "position": {
+            "at": "after",
+            "column": "email"
+          }
+        }
+      ],
+      "params": []
+    }
+  },
+  {
+    "name": "use a column after dropping it",
+    "expect": "E_EDIT_UNKNOWN_COLUMN",
+    "plan": {
+      "kind": "edit",
+      "target": "Contacts",
+      "ops": [
+        {
+          "op": "dropColumn",
+          "col": "fax"
+        },
+        {
+          "op": "renameColumn",
+          "col": "fax",
+          "to": "facsimile"
+        }
+      ],
+      "params": []
+    }
+  },
+  {
+    "name": "add a column with no position",
+    "expect": "E_PARSE_MISSING_FIELD",
+    "plan": {
+      "kind": "edit",
+      "target": "Contacts",
+      "ops": [
+        {
+          "op": "addColumn",
+          "as": "x",
+          "expr": {
+            "type": "lit",
+            "value": 1
+          }
+        }
+      ],
+      "params": []
+    }
+  },
+  {
+    "name": "a consent written by the model",
+    "expect": "E_PARSE_UNKNOWN_FIELD",
+    "plan": {
+      "kind": "edit",
+      "target": "Contacts",
+      "ops": [
+        {
+          "op": "dropColumn",
+          "col": "fax"
+        }
+      ],
+      "params": [],
+      "onDependents": "convertToValues"
+    }
+  },
+  {
+    "name": "template column missing",
+    "expect": "E_TEMPLATE_COLUMN_MISSING",
+    "plan": {
+      "kind": "query",
+      "source": "Contacts",
+      "steps": [
+        {
+          "op": "project",
+          "columns": [
+            {
+              "as": "first_name",
+              "expr": {
+                "type": "col",
+                "col": "first_name"
+              }
+            },
+            {
+              "as": "last_name",
+              "expr": {
+                "type": "col",
+                "col": "last_name"
+              }
+            },
+            {
+              "as": "email",
+              "expr": {
+                "type": "col",
+                "col": "email"
+              }
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "template",
+        "templateId": "crm-exact"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "writes the template's formula column",
+    "expect": "E_TEMPLATE_EXTRA_COLUMN",
+    "plan": {
+      "kind": "query",
+      "source": "Contacts",
+      "steps": [
+        {
+          "op": "project",
+          "columns": [
+            {
+              "as": "Row #",
+              "expr": {
+                "type": "lit",
+                "value": 1
+              }
+            },
+            {
+              "as": "Contact Name",
+              "expr": {
+                "type": "col",
+                "col": "first_name"
+              }
+            },
+            {
+              "as": "Email Domain",
+              "expr": {
+                "type": "lit",
+                "value": null
+              }
+            },
+            {
+              "as": "Region Name",
+              "expr": {
+                "type": "lit",
+                "value": null
+              }
+            },
+            {
+              "as": "Customer Since",
+              "expr": {
+                "type": "lit",
+                "value": null
+              }
+            },
+            {
+              "as": "Status",
+              "expr": {
+                "type": "lit",
+                "value": null
+              }
+            },
+            {
+              "as": "Owner",
+              "expr": {
+                "type": "lit",
+                "value": null
+              }
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "template",
+        "templateId": "crm-enriched"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "template columns out of order",
+    "expect": "E_TEMPLATE_COLUMN_ORDER",
+    "plan": {
+      "kind": "query",
+      "source": "Contacts",
+      "steps": [
+        {
+          "op": "project",
+          "columns": [
+            {
+              "as": "last_name",
+              "expr": {
+                "type": "col",
+                "col": "last_name"
+              }
+            },
+            {
+              "as": "first_name",
+              "expr": {
+                "type": "col",
+                "col": "first_name"
+              }
+            },
+            {
+              "as": "email",
+              "expr": {
+                "type": "col",
+                "col": "email"
+              }
+            },
+            {
+              "as": "company",
+              "expr": {
+                "type": "col",
+                "col": "company"
+              }
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "template",
+        "templateId": "crm-exact"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "text into a date column",
+    "expect": "E_TEMPLATE_TYPE_INCOMPATIBLE",
+    "plan": {
+      "kind": "query",
+      "source": "Contacts",
+      "steps": [
+        {
+          "op": "project",
+          "columns": [
+            {
+              "as": "Given Name",
+              "expr": {
+                "type": "col",
+                "col": "first_name"
+              }
+            },
+            {
+              "as": "Surname",
+              "expr": {
+                "type": "col",
+                "col": "last_name"
+              }
+            },
+            {
+              "as": "E-mail Address",
+              "expr": {
+                "type": "col",
+                "col": "email"
+              }
+            },
+            {
+              "as": "Organisation",
+              "expr": {
+                "type": "col",
+                "col": "company"
+              }
+            },
+            {
+              "as": "Phone Number",
+              "expr": {
+                "type": "col",
+                "col": "phone"
+              }
+            },
+            {
+              "as": "Joined On",
+              "expr": {
+                "type": "col",
+                "col": "email"
+              }
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "template",
+        "templateId": "crm-synonyms"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "toText into a date-formatted template column",
+    "expect": "E_TOTEXT_OUTSIDE_CONCAT",
+    "plan": {
+      "kind": "query",
+      "source": "Contacts",
+      "steps": [
+        {
+          "op": "project",
+          "columns": [
+            {
+              "as": "Given Name",
+              "expr": {
+                "type": "col",
+                "col": "first_name"
+              }
+            },
+            {
+              "as": "Surname",
+              "expr": {
+                "type": "col",
+                "col": "last_name"
+              }
+            },
+            {
+              "as": "E-mail Address",
+              "expr": {
+                "type": "col",
+                "col": "email"
+              }
+            },
+            {
+              "as": "Organisation",
+              "expr": {
+                "type": "col",
+                "col": "company"
+              }
+            },
+            {
+              "as": "Phone Number",
+              "expr": {
+                "type": "col",
+                "col": "phone"
+              }
+            },
+            {
+              "as": "Joined On",
+              "expr": {
+                "type": "toText",
+                "arg": {
+                  "type": "col",
+                  "col": "signup_date"
+                },
+                "pattern": "yyyy-mm-dd"
+              }
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "template",
+        "templateId": "crm-synonyms"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "status values outside the template's list",
+    "expect": "E_TEMPLATE_VALUE_NOT_IN_LIST",
+    "plan": {
+      "kind": "query",
+      "source": "Contacts",
+      "steps": [
+        {
+          "op": "project",
+          "columns": [
+            {
+              "as": "Contact Name",
+              "expr": {
+                "type": "col",
+                "col": "first_name"
+              }
+            },
+            {
+              "as": "Email Domain",
+              "expr": {
+                "type": "lit",
+                "value": null
+              }
+            },
+            {
+              "as": "Region Name",
+              "expr": {
+                "type": "lit",
+                "value": null
+              }
+            },
+            {
+              "as": "Customer Since",
+              "expr": {
+                "type": "lit",
+                "value": null
+              }
+            },
+            {
+              "as": "Status",
+              "expr": {
+                "type": "col",
+                "col": "status"
+              }
+            },
+            {
+              "as": "Owner",
+              "expr": {
+                "type": "lit",
+                "value": null
+              }
+            }
+          ]
+        }
+      ],
+      "sink": {
+        "mode": "template",
+        "templateId": "crm-enriched"
+      },
+      "params": []
+    }
+  },
+  {
+    "name": "pivot into a template",
+    "expect": "E_TEMPLATE_DYNAMIC_COLUMNS",
+    "plan": {
+      "kind": "query",
+      "source": "Orders",
+      "steps": [
+        {
+          "op": "pivot",
+          "rows": [
+            "region"
+          ],
+          "cols": "channel",
+          "values": "amount"
+        }
+      ],
+      "sink": {
+        "mode": "template",
+        "templateId": "crm-exact"
+      },
+      "params": []
+    }
+  }
+]

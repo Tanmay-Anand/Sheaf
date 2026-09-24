@@ -1,0 +1,47 @@
+{
+  "question": "delete the test accounts (the summary sums the whole column, so it is meant to change)",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "contact_id: string",
+      "first_name: string",
+      "last_name: string",
+      "email: string",
+      "phone: string",
+      "company: string?",
+      "street: string?",
+      "city: categorical",
+      "postcode: string?",
+      "region: categorical",
+      "signup_date: date",
+      "status: categorical",
+      "fax: string?",
+      "lifetime_value: currency:INR"
+    ],
+    "impact": {
+      "removesRows": true
+    }
+  },
+  "plan": {
+    "kind": "edit",
+    "target": "Contacts",
+    "ops": [
+      {
+        "op": "dropRows",
+        "where": {
+          "op": "eq",
+          "left": {
+            "type": "col",
+            "col": "status"
+          },
+          "right": {
+            "type": "lit",
+            "value": "test"
+          }
+        }
+      }
+    ],
+    "params": []
+  }
+}

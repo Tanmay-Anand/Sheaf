@@ -1,18 +1,53 @@
+export type ValueType = "string" | "number" | "boolean" | "date" | "datetime";
+export type AggFn = "count" | "countDistinct" | "countIf" | "sum" | "avg" | "min" | "max";
+export type SortDir = "asc" | "desc";
 export type JoinKind = "inner" | "left";
 export type Grain = "day" | "week" | "month" | "quarter" | "year";
 
-export interface Plan {
-  meta: PlanMeta;
-  sink: NewSheetSink | ExistingAnchorSink;
-  source: EntityRef;
-  steps: (FilterStep | DeriveStep | AggregateStep | SortStep | LimitStep | JoinStep | PivotStep | PeriodCompareStep)[];
+export interface PlanEnvelope {
+  irVersion: string;
+  plan: QueryPlan | EditPlan;
   [k: string]: unknown;
 }
-export interface PlanMeta {
-  generatedAt: string;
-  modelId: string;
-  planHash: string;
-  promptVersion: string;
+export interface QueryPlan {
+  bindings: Bindings;
+  params: ParamDecl[];
+  sink: NewSheetSink | AnchorSink | TemplateSink;
+  source: string;
+  steps: (
+    | FilterStep
+    | DeriveStep
+    | AggregateStep
+    | SortStep
+    | LimitStep
+    | JoinStep
+    | PivotStep
+    | PeriodCompareStep
+    | ProjectStep
+    | LookupStep
+  )[];
+  kind: "query";
+  [k: string]: unknown;
+}
+export interface Bindings {
+  entities: EntityBinding[];
+  [k: string]: unknown;
+}
+export interface EntityBinding {
+  columns: ColumnBinding[];
+  id: string;
+  name: string;
+  sheetId: string;
+  [k: string]: unknown;
+}
+export interface ColumnBinding {
+  id: string;
+  name: string;
+  [k: string]: unknown;
+}
+export interface ParamDecl {
+  name: string;
+  valueType: ValueType;
   [k: string]: unknown;
 }
 export interface NewSheetSink {
@@ -21,14 +56,15 @@ export interface NewSheetSink {
   mode: "newSheet";
   [k: string]: unknown;
 }
-export interface ExistingAnchorSink {
-  expectedCols: number;
-  range: string;
-  mode: "existingAnchor";
+export interface AnchorSink {
+  mode: "anchor";
   [k: string]: unknown;
 }
-export interface EntityRef {
-  ref: string;
+export interface TemplateSink {
+  firstDataRow: number;
+  headerRow: number;
+  templateId: string;
+  mode: "template";
   [k: string]: unknown;
 }
 export interface FilterStep {
@@ -50,8 +86,8 @@ export interface FilterStep {
   [k: string]: unknown;
 }
 export interface EqPredicate {
-  left: ColRef | Lit;
-  right: ColRef | Lit;
+  left: ColRef | Lit | ParamRef;
+  right: ColRef | Lit | ParamRef;
   op: "eq";
   [k: string]: unknown;
 }
@@ -62,36 +98,42 @@ export interface ColRef {
 }
 export interface Lit {
   value?: unknown;
+  valueType?: ValueType;
   type: "lit";
   [k: string]: unknown;
 }
+export interface ParamRef {
+  name: string;
+  type: "param";
+  [k: string]: unknown;
+}
 export interface NePredicate {
-  left: ColRef | Lit;
-  right: ColRef | Lit;
+  left: ColRef | Lit | ParamRef;
+  right: ColRef | Lit | ParamRef;
   op: "ne";
   [k: string]: unknown;
 }
 export interface LtPredicate {
-  left: ColRef | Lit;
-  right: ColRef | Lit;
+  left: ColRef | Lit | ParamRef;
+  right: ColRef | Lit | ParamRef;
   op: "lt";
   [k: string]: unknown;
 }
 export interface LtePredicate {
-  left: ColRef | Lit;
-  right: ColRef | Lit;
+  left: ColRef | Lit | ParamRef;
+  right: ColRef | Lit | ParamRef;
   op: "lte";
   [k: string]: unknown;
 }
 export interface GtPredicate {
-  left: ColRef | Lit;
-  right: ColRef | Lit;
+  left: ColRef | Lit | ParamRef;
+  right: ColRef | Lit | ParamRef;
   op: "gt";
   [k: string]: unknown;
 }
 export interface GtePredicate {
-  left: ColRef | Lit;
-  right: ColRef | Lit;
+  left: ColRef | Lit | ParamRef;
+  right: ColRef | Lit | ParamRef;
   op: "gte";
   [k: string]: unknown;
 }
@@ -143,13 +185,20 @@ export interface DeriveStep {
     | YearOfExpr
     | QuarterOfExpr
     | MonthOfExpr
-    | WeekOfExpr
+    | IsoWeekOfExpr
     | DayOfExpr
-    | DayOfWeekExpr
+    | IsoDayOfWeekExpr
     | BucketExpr
     | CoalesceExpr
     | CaseExpr
-    | SumAllExpr;
+    | SumAllExpr
+    | ConcatExpr
+    | TrimExpr
+    | UpperExpr
+    | LowerExpr
+    | SplitPartExpr
+    | ToTextExpr
+    | ParamRef1;
   op: "derive";
   [k: string]: unknown;
 }
@@ -160,6 +209,7 @@ export interface ColRef1 {
 }
 export interface Lit1 {
   value?: unknown;
+  valueType?: ValueType;
   type: "lit";
   [k: string]: unknown;
 }
@@ -202,9 +252,9 @@ export interface MonthOfExpr {
   type: "monthOf";
   [k: string]: unknown;
 }
-export interface WeekOfExpr {
+export interface IsoWeekOfExpr {
   col: string;
-  type: "weekOf";
+  type: "isoWeekOf";
   [k: string]: unknown;
 }
 export interface DayOfExpr {
@@ -212,9 +262,9 @@ export interface DayOfExpr {
   type: "dayOf";
   [k: string]: unknown;
 }
-export interface DayOfWeekExpr {
+export interface IsoDayOfWeekExpr {
   col: string;
-  type: "dayOfWeek";
+  type: "isoDayOfWeek";
   [k: string]: unknown;
 }
 export interface BucketExpr {
@@ -237,6 +287,35 @@ export interface SumAllExpr {
   type: "sumAll";
   [k: string]: unknown;
 }
+export interface ConcatExpr {
+  type: "concat";
+  [k: string]: unknown;
+}
+export interface TrimExpr {
+  type: "trim";
+  [k: string]: unknown;
+}
+export interface UpperExpr {
+  type: "upper";
+  [k: string]: unknown;
+}
+export interface LowerExpr {
+  type: "lower";
+  [k: string]: unknown;
+}
+export interface SplitPartExpr {
+  type: "splitPart";
+  [k: string]: unknown;
+}
+export interface ToTextExpr {
+  type: "toText";
+  [k: string]: unknown;
+}
+export interface ParamRef1 {
+  name: string;
+  type: "param";
+  [k: string]: unknown;
+}
 export interface AggregateStep {
   groupBy: string[];
   measures: AggregateMeasure[];
@@ -245,7 +324,7 @@ export interface AggregateStep {
 }
 export interface AggregateMeasure {
   as: string;
-  fn: string;
+  fn: AggFn;
   of: string;
   where?:
     | EqPredicate
@@ -270,7 +349,7 @@ export interface SortStep {
 }
 export interface SortKey {
   col: string;
-  dir: string;
+  dir: SortDir;
   [k: string]: unknown;
 }
 export interface LimitStep {
@@ -305,5 +384,180 @@ export interface PeriodCompareStep {
   prior: string;
   timeDim: string;
   op: "periodCompare";
+  [k: string]: unknown;
+}
+export interface ProjectStep {
+  columns: ProjectColumn[];
+  op: "project";
+  [k: string]: unknown;
+}
+export interface ProjectColumn {
+  as: string;
+  expr:
+    | ColRef1
+    | Lit1
+    | AddExpr
+    | SubExpr
+    | MulExpr
+    | DivExpr
+    | RatioExpr
+    | PctExpr
+    | YearOfExpr
+    | QuarterOfExpr
+    | MonthOfExpr
+    | IsoWeekOfExpr
+    | DayOfExpr
+    | IsoDayOfWeekExpr
+    | BucketExpr
+    | CoalesceExpr
+    | CaseExpr
+    | SumAllExpr
+    | ConcatExpr
+    | TrimExpr
+    | UpperExpr
+    | LowerExpr
+    | SplitPartExpr
+    | ToTextExpr
+    | ParamRef1;
+  [k: string]: unknown;
+}
+export interface LookupStep {
+  on: JoinKey;
+  take?: string[];
+  with: string;
+  op: "lookup";
+  [k: string]: unknown;
+}
+export interface EditPlan {
+  bindings: Bindings;
+  ops: (AddColumn | SetColumn | DropColumn | RenameColumn | MoveColumn | DropRows)[];
+  params: ParamDecl[];
+  target: string;
+  kind: "edit";
+  [k: string]: unknown;
+}
+export interface AddColumn {
+  as: string;
+  expr:
+    | ColRef1
+    | Lit1
+    | AddExpr
+    | SubExpr
+    | MulExpr
+    | DivExpr
+    | RatioExpr
+    | PctExpr
+    | YearOfExpr
+    | QuarterOfExpr
+    | MonthOfExpr
+    | IsoWeekOfExpr
+    | DayOfExpr
+    | IsoDayOfWeekExpr
+    | BucketExpr
+    | CoalesceExpr
+    | CaseExpr
+    | SumAllExpr
+    | ConcatExpr
+    | TrimExpr
+    | UpperExpr
+    | LowerExpr
+    | SplitPartExpr
+    | ToTextExpr
+    | ParamRef1;
+  position: First | Last | After;
+  op: "addColumn";
+  [k: string]: unknown;
+}
+export interface First {
+  at: "first";
+  [k: string]: unknown;
+}
+export interface Last {
+  at: "last";
+  [k: string]: unknown;
+}
+export interface After {
+  column: string;
+  at: "after";
+  [k: string]: unknown;
+}
+export interface SetColumn {
+  col: string;
+  expr:
+    | ColRef1
+    | Lit1
+    | AddExpr
+    | SubExpr
+    | MulExpr
+    | DivExpr
+    | RatioExpr
+    | PctExpr
+    | YearOfExpr
+    | QuarterOfExpr
+    | MonthOfExpr
+    | IsoWeekOfExpr
+    | DayOfExpr
+    | IsoDayOfWeekExpr
+    | BucketExpr
+    | CoalesceExpr
+    | CaseExpr
+    | SumAllExpr
+    | ConcatExpr
+    | TrimExpr
+    | UpperExpr
+    | LowerExpr
+    | SplitPartExpr
+    | ToTextExpr
+    | ParamRef1;
+  where?:
+    | EqPredicate
+    | NePredicate
+    | LtPredicate
+    | LtePredicate
+    | GtPredicate
+    | GtePredicate
+    | InPredicate
+    | NotInPredicate
+    | IsNullPredicate
+    | IsNotNullPredicate
+    | AndPredicate
+    | OrPredicate
+    | NotPredicate;
+  op: "setColumn";
+  [k: string]: unknown;
+}
+export interface DropColumn {
+  col: string;
+  op: "dropColumn";
+  [k: string]: unknown;
+}
+export interface RenameColumn {
+  col: string;
+  to: string;
+  op: "renameColumn";
+  [k: string]: unknown;
+}
+export interface MoveColumn {
+  col: string;
+  position: First | Last | After;
+  op: "moveColumn";
+  [k: string]: unknown;
+}
+export interface DropRows {
+  where:
+    | EqPredicate
+    | NePredicate
+    | LtPredicate
+    | LtePredicate
+    | GtPredicate
+    | GtePredicate
+    | InPredicate
+    | NotInPredicate
+    | IsNullPredicate
+    | IsNotNullPredicate
+    | AndPredicate
+    | OrPredicate
+    | NotPredicate;
+  op: "dropRows";
   [k: string]: unknown;
 }

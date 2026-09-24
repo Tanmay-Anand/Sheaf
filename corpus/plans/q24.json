@@ -1,0 +1,43 @@
+{
+  "question": "remove the lifetime value column (a summary formula uses it; the user decides at commit)",
+  "expect": {
+    "valid": true,
+    "warnings": [
+      "W_DEPENDENTS_NEED_CONSENT"
+    ],
+    "output": [
+      "contact_id: string",
+      "first_name: string",
+      "last_name: string",
+      "email: string",
+      "phone: string",
+      "company: string?",
+      "street: string?",
+      "city: categorical",
+      "postcode: string?",
+      "region: categorical",
+      "signup_date: date",
+      "status: categorical",
+      "fax: string?"
+    ],
+    "impact": {
+      "removed": [
+        "lifetime_value"
+      ],
+      "dependentsNeedingConsent": [
+        "lifetime_value <- Summary!B2 (exclusive, columnRemoved)"
+      ]
+    }
+  },
+  "plan": {
+    "kind": "edit",
+    "target": "Contacts",
+    "ops": [
+      {
+        "op": "dropColumn",
+        "col": "lifetime_value"
+      }
+    ],
+    "params": []
+  }
+}

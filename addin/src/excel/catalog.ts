@@ -1,9 +1,11 @@
 /* global Excel, Office */
 import type { CatalogCorrection, WorkbookCatalog } from "@sheaf/contract/catalog";
 import { buildCatalog } from "../catalog/build";
+import { planRowChunks } from "../catalog/chunks";
 import { CATALOG_NAMESPACE, decodeCatalogXml, encodeCatalogXml } from "../catalog/persist";
 import type {
   CellValue,
+  DateProbe,
   NamedItemSnapshot,
   ReferenceSource,
   SheetSnapshot,
@@ -11,16 +13,20 @@ import type {
   ValidationSnapshot,
   WorkbookSnapshot,
 } from "../catalog/types";
+import { classifyFormat } from "../catalog/values";
 
 /**
  * Office.js side of the workbook catalog. The only module in src/catalog's orbit that touches
- * Excel. Reads are bulk (one sync per sheet for cells), everything optional is feature-gated
- * and best-effort, and a failure in an optional read never fails the scan.
+ * Excel. Reads are bulk (one sync per sheet, or per block of rows when a sheet is large enough to
+ * approach Excel on the web's 5 MB payload limit), everything optional is feature-gated and
+ * best-effort, and a failure in an optional read never fails the scan.
  */
 
 /** Sheaf's own hidden sheets (snapshots, M6) are never catalogued. */
 const INTERNAL_SHEET = /^__sheaf/i;
 const MAX_VALIDATION_COLUMNS = 300;
+/** Date cells whose displayed text is read to infer the 1900/1904 date system. */
+const MAX_DATE_PROBES = 5;
 
 function supports(version: string): boolean {
   return Office.context.requirements.isSetSupported("ExcelApi", version);
@@ -32,29 +38,107 @@ function toCell(v: unknown): CellValue {
   return String(v);
 }
 
-async function readSheets(context: Excel.RequestContext, names: string[]): Promise<SheetSnapshot[]> {
+interface SheetRef {
+  id: string;
+  name: string;
+}
+
+interface Grid {
+  values: unknown[][];
+  formulas: unknown[][];
+  numberFormat: unknown[][];
+}
+
+async function readGrid(
+  context: Excel.RequestContext,
+  ws: Excel.Worksheet,
+  row: number,
+  col: number,
+  rows: number,
+  cols: number,
+): Promise<Grid> {
+  const range = ws.getRangeByIndexes(row, col, rows, cols);
+  range.load(["values", "formulas", "numberFormat"]);
+  await context.sync();
+  const grid = { values: range.values, formulas: range.formulas, numberFormat: range.numberFormat };
+  context.trackedObjects.remove(range);
+  return grid;
+}
+
+async function readSheets(context: Excel.RequestContext, refs: SheetRef[]): Promise<SheetSnapshot[]> {
   const out: SheetSnapshot[] = [];
-  for (const name of names) {
-    const used = context.workbook.worksheets.getItem(name).getUsedRangeOrNullObject(true);
-    used.load(["isNullObject", "rowIndex", "columnIndex", "values", "formulas", "numberFormat"]);
-    await context.sync(); // one read per sheet keeps each payload bounded
+  const chunked = supports("1.7"); // getRangeByIndexes
+  for (const { id, name } of refs) {
+    const ws = context.workbook.worksheets.getItem(name);
+    const used = ws.getUsedRangeOrNullObject(true);
+    if (chunked) used.load(["isNullObject", "rowIndex", "columnIndex", "rowCount", "columnCount"]);
+    else used.load(["isNullObject", "rowIndex", "columnIndex", "values", "formulas", "numberFormat"]);
+    await context.sync();
     if (used.isNullObject) continue;
+
+    let grid: Grid;
+    if (chunked) {
+      // Each block is its own request, so no single payload grows with the sheet.
+      grid = { values: [], formulas: [], numberFormat: [] };
+      for (const c of planRowChunks(used.rowCount, used.columnCount)) {
+        const part = await readGrid(context, ws, used.rowIndex + c.start, used.columnIndex, c.count, used.columnCount);
+        grid.values.push(...part.values);
+        grid.formulas.push(...part.formulas);
+        grid.numberFormat.push(...part.numberFormat);
+      }
+    } else {
+      grid = { values: used.values, formulas: used.formulas, numberFormat: used.numberFormat };
+    }
     out.push({
+      id,
       name,
       originRow: used.rowIndex + 1,
       originCol: used.columnIndex,
-      values: used.values.map((r) => r.map(toCell)),
-      formulas: used.formulas.map((r) => r.map(toCell)),
-      numberFormats: used.numberFormat.map((r) => r.map((f) => String(f ?? "General"))),
+      values: grid.values.map((r) => r.map(toCell)),
+      formulas: grid.formulas.map((r) => r.map(toCell)),
+      numberFormats: grid.numberFormat.map((r) => r.map((f) => String(f ?? "General"))),
     });
     context.trackedObjects.remove(used);
   }
   return out;
 }
 
+/**
+ * A few date cells as Excel displays them. Office.js can't report the date system
+ * (Workbook.use1904DateSystem is preview-only), so the catalog infers it from these.
+ */
+async function readDateProbes(context: Excel.RequestContext, sheets: SheetSnapshot[]): Promise<DateProbe[]> {
+  const picks: { sheet: string; row: number; col: number; serial: number; numberFormat: string }[] = [];
+  for (const s of sheets) {
+    s.values.forEach((row, r) =>
+      row.forEach((v, c) => {
+        if (picks.length >= MAX_DATE_PROBES || typeof v !== "number" || v < 61) return;
+        const fmt = s.numberFormats?.[r]?.[c];
+        const kind = classifyFormat(fmt).kind;
+        if (fmt && (kind === "date" || kind === "datetime")) {
+          picks.push({ sheet: s.name, row: s.originRow - 1 + r, col: s.originCol + c, serial: v, numberFormat: fmt });
+        }
+      }),
+    );
+    if (picks.length >= MAX_DATE_PROBES) break;
+  }
+  if (picks.length === 0) return [];
+  try {
+    const cells = picks.map((p) => {
+      const cell = context.workbook.worksheets.getItem(p.sheet).getCell(p.row, p.col);
+      cell.load("text");
+      return cell;
+    });
+    await context.sync();
+    return picks.map((p, i) => ({ serial: p.serial, numberFormat: p.numberFormat, text: String(cells[i]!.text?.[0]?.[0] ?? "") }));
+  } catch {
+    return []; // the date system is then "unknown", which only means date values can't be written
+  }
+}
+
 async function readTables(context: Excel.RequestContext): Promise<TableSnapshot[]> {
   const tables = context.workbook.tables;
-  tables.load("items/name,items/showHeaders,items/showTotals");
+  tables.load("items/id,items/name,items/showHeaders,items/showTotals");
   await context.sync();
   const parts = tables.items.map((t) => {
     const range = t.getRange();
@@ -62,19 +146,21 @@ async function readTables(context: Excel.RequestContext): Promise<TableSnapshot[
     const ws = t.worksheet;
     ws.load("name");
     const cols = t.columns;
-    cols.load("items/name");
+    cols.load("items/id,items/name");
     return { t, range, ws, cols };
   });
   await context.sync();
   return parts
     .filter((p) => !INTERNAL_SHEET.test(p.ws.name))
     .map((p) => ({
+      id: p.t.id,
       name: p.t.name,
       sheet: p.ws.name,
       address: p.range.address,
       showHeaders: p.t.showHeaders,
       showTotals: p.t.showTotals,
       columns: p.cols.items.map((c) => c.name),
+      columnIds: p.cols.items.map((c) => String(c.id)),
     }));
 }
 
@@ -201,6 +287,8 @@ async function readValidations(context: Excel.RequestContext, draft: WorkbookCat
 export interface ScanOptions {
   exemplars: boolean;
   corrections: CatalogCorrection[];
+  /** The previous catalog, so regions that moved or grew keep their ids. */
+  previous: WorkbookCatalog | null;
 }
 
 export interface ScanResult {
@@ -213,24 +301,27 @@ export interface ScanResult {
 export async function scanWorkbook(opts: ScanOptions): Promise<ScanResult> {
   return Excel.run(async (context) => {
     const worksheets = context.workbook.worksheets;
-    worksheets.load("items/name");
+    worksheets.load("items/id,items/name");
     await context.sync();
-    const sheetNames = worksheets.items.map((w) => w.name).filter((n) => !INTERNAL_SHEET.test(n));
+    const refs = worksheets.items.filter((w) => !INTERNAL_SHEET.test(w.name)).map((w) => ({ id: w.id, name: w.name }));
+    const sheetNames = refs.map((r) => r.name);
 
     const tables = await readTables(context);
     const names = await readNames(context);
-    const sheets = await readSheets(context, sheetNames);
+    const sheets = await readSheets(context, refs);
+    const dateProbes = await readDateProbes(context, sheets);
     const sources = [
       ...(await readChartAndPivotSources(context, sheetNames)),
       ...(await readConditionalFormats(context, sheetNames)),
     ];
 
-    const snapshot: WorkbookSnapshot = { sheets, tables, names, sources, validations: [] };
-    const draft = buildCatalog(snapshot, { exemplars: opts.exemplars, corrections: opts.corrections });
+    const snapshot: WorkbookSnapshot = { sheets, tables, names, sources, validations: [], dateProbes };
+    const build = { exemplars: opts.exemplars, corrections: opts.corrections, previous: opts.previous };
+    const draft = buildCatalog(snapshot, build);
     snapshot.validations = await readValidations(context, draft);
     const catalog =
       snapshot.validations.length > 0
-        ? buildCatalog(snapshot, { exemplars: opts.exemplars, corrections: opts.corrections })
+        ? buildCatalog(snapshot, build)
         : draft;
     return { catalog, snapshot };
   });

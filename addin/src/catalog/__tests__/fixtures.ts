@@ -44,6 +44,7 @@ export function corpusRows(file: string): string[][] {
 /** A sheet as Excel's used range would hand it over: text cells, blanks as null. */
 export function sheetFromRows(name: string, rows: CellValue[][], originRow = 1, originCol = 0): SheetSnapshot {
   return {
+    id: `ws-${name}`,
     name,
     originRow,
     originCol,

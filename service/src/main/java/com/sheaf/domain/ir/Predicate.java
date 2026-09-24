@@ -10,10 +10,10 @@ import java.util.List;
 /**
  * Closed predicate grammar for filter expressions and conditional aggregates.
  *
- * <p>Serialisation note: the "op" discriminator produces JSON like
+ * <p>Wire format: the "op" discriminator, e.g.
  * {@code {"op":"eq","left":{"type":"col","col":"status"},"right":{"type":"lit","value":"returned"}}}.
- * A prettier wire format (matching the IR spec's {@code {"eq":["status","returned"]}})
- * will be added via custom serialisers in M3.
+ * Column and literal are always explicit. The docs' shorthand {@code {"eq":["status","returned"]}}
+ * is ambiguous (is "returned" a column or a value?), so it is reading notation only.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "op")
 @JsonSubTypes({
@@ -66,18 +66,16 @@ public sealed interface Predicate
 
     // ── Value reference (column or literal) ───────────────────────────────────
 
-    /**
-     * A value used in a binary predicate: either a column reference or a literal.
-     * The bare-string shorthand for column references (e.g. {@code "status"} meaning
-     * {@code {"type":"col","col":"status"}}) requires a custom deserialiser added in M3.
-     */
+    /** A value used in a binary predicate: either a column reference or a literal. Always explicit. */
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
     @JsonSubTypes({
             @JsonSubTypes.Type(value = ValueRef.ColRef.class, name = "col"),
-            @JsonSubTypes.Type(value = ValueRef.Lit.class,    name = "lit")
+            @JsonSubTypes.Type(value = ValueRef.Lit.class,    name = "lit"),
+            @JsonSubTypes.Type(value = ValueRef.ParamRef.class, name = "param")
     })
-    sealed interface ValueRef permits ValueRef.ColRef, ValueRef.Lit {
-        record ColRef(String col)   implements ValueRef {}
-        record Lit(@Nullable Object value)    implements ValueRef {}
+    sealed interface ValueRef permits ValueRef.ColRef, ValueRef.Lit, ValueRef.ParamRef {
+        record ColRef(String col) implements ValueRef {}
+        record Lit(@Nullable Object value, @Nullable ValueType valueType) implements ValueRef {}
+        record ParamRef(String name) implements ValueRef {}
     }
 }

@@ -1,14 +1,17 @@
 package com.sheaf;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheaf.domain.ir.Plan;
+import com.sheaf.domain.ir.PlanEnvelope;
+import com.sheaf.domain.ir.PlanHasher;
+import com.sheaf.domain.ir.Sink;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,8 +19,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Thin vertical slice: POST /api/plan → hardcoded Plan → JSON response.
- * Proves the round trip, the types, and the JSON serialisation are all correct.
+ * Thin vertical slice: POST /api/plan → hardcoded plan → {envelope, planHash, meta}.
+ * Proves the round trip, the types, the JSON serialisation and the hash are all correct.
  * Runs in-process (MockMvc), no real server needed, works on all platforms.
  */
 @SpringBootTest
@@ -27,44 +30,42 @@ class PlanControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
 
-    @Test
-    void plan_endpoint_returns_a_valid_plan() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        post("/api/plan")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        {"question":"total revenue by region"}
-                                        """))
+    private JsonNode ask(String question) throws Exception {
+        String body = mockMvc.perform(post("/api/plan")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(java.util.Map.of("question", question))))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        Plan plan = objectMapper.readValue(result.getResponse().getContentAsString(), Plan.class);
-
-        assertThat(plan.source().ref()).isEqualTo("Orders");
-        assertThat(plan.steps()).hasSize(3);
-        assertThat(plan.sink()).isNotNull();
-        assertThat(plan.meta()).isNotNull();
-        assertThat(plan.meta().modelId()).isEqualTo("hardcoded-m1");
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(body);
     }
 
     @Test
-    void plan_serialises_and_deserialises_without_loss() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        post("/api/plan")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-                                        {"question":"anything"}
-                                        """))
-                .andExpect(status().isOk())
-                .andReturn();
+    void plan_endpoint_returns_an_envelope_its_hash_and_provenance() throws Exception {
+        JsonNode record = ask("total revenue by region");
 
-        String json = result.getResponse().getContentAsString();
+        PlanEnvelope envelope = objectMapper.treeToValue(record.get("envelope"), PlanEnvelope.class);
+        assertThat(envelope.irVersion()).isEqualTo(PlanEnvelope.IR_VERSION);
+        var query = (Plan.QueryPlan) envelope.plan();
+        assertThat(query.source()).isEqualTo("Orders");
+        assertThat(query.steps()).hasSize(3);
+        assertThat(query.sink()).isInstanceOf(Sink.NewSheetSink.class);
 
-        // Deserialise back to Plan and re-serialise; the two JSON strings must be equal.
-        Plan plan = objectMapper.readValue(json, Plan.class);
-        String rejson = objectMapper.writeValueAsString(plan);
+        assertThat(record.get("planHash").asText()).isEqualTo(PlanHasher.hash(envelope)).startsWith("sha256:");
+        assertThat(record.get("meta").get("modelId").asText()).isEqualTo("hardcoded-m1");
+        // Provenance sits outside the hashed envelope.
+        assertThat(record.get("envelope").has("meta")).isFalse();
+        assertThat(record.get("envelope").get("plan").has("meta")).isFalse();
+    }
 
-        assertThat(objectMapper.readTree(rejson)).isEqualTo(objectMapper.readTree(json));
+    @Test
+    void the_envelope_serialises_and_deserialises_without_loss_and_the_hash_is_stable() throws Exception {
+        JsonNode first = ask("anything");
+        JsonNode second = ask("something else");
+
+        PlanEnvelope envelope = objectMapper.treeToValue(first.get("envelope"), PlanEnvelope.class);
+        assertThat((JsonNode) objectMapper.valueToTree(envelope)).isEqualTo(first.get("envelope"));
+        // Same plan, generated at different moments: same hash.
+        assertThat(second.get("planHash")).isEqualTo(first.get("planHash"));
     }
 }

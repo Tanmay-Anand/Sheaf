@@ -1,0 +1,56 @@
+{
+  "question": "inventory items below reorder level, by warehouse",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "item_id: string",
+      "item_name: string",
+      "category: categorical",
+      "warehouse: categorical",
+      "qty_on_hand: number",
+      "unit_cost: currency:INR",
+      "reorder_level: number",
+      "last_restocked: date",
+      "supplier: string"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Inventory",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "lt",
+          "left": {
+            "type": "col",
+            "col": "qty_on_hand"
+          },
+          "right": {
+            "type": "col",
+            "col": "reorder_level"
+          }
+        }
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "warehouse",
+            "dir": "asc"
+          },
+          {
+            "col": "qty_on_hand",
+            "dir": "asc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

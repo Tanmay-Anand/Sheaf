@@ -21,17 +21,20 @@ class CatalogControllerTest {
     private static String catalogWithExemplars(String exemplarsJson) {
         return """
                 {
-                  "version": 1,
+                  "version": 2,
                   "generatedAt": "2026-09-24T10:00:00Z",
+                  "dateSystem": "1900",
                   "entities": [{
-                    "name": "Orders", "kind": "region", "sheet": "Orders", "address": "Orders!A1:C4",
+                    "id": "t:Orders", "name": "Orders", "kind": "region", "sheetId": "{8C1A}", "sheet": "Orders", "address": "Orders!A1:C4",
                     "headerRow": 1, "headerRows": 1, "firstDataRow": 2, "lastDataRow": 4,
                     "dataRowCount": 3, "skippedRows": [], "contentHash": "abc123",
                     "columns": [{
-                      "name": "region", "letter": "A", "index": 0, "kind": "categorical",
+                      "id": "c:1", "name": "region", "letter": "A", "index": 0, "kind": "categorical",
                       "nullable": false, "nullRate": 0.0, "distinctCount": 3, "keyCandidate": false,
                       "formula": false, "exemplars": %s,
-                      "dependents": [{"kind": "formula", "location": "Summary!B2", "detail": "=COUNTA(Orders!A:A)"}],
+                      "mayContainErrors": false, "numbersStoredAsText": false,
+                      "dependents": [{"kind": "formula", "location": "Summary!B2", "detail": "=COUNTA(Orders!A:A)",
+                                      "refClass": "wholeColumn", "fixedRows": false}],
                       "warnings": []
                     }]
                   }],

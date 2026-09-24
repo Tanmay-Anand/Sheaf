@@ -16,7 +16,10 @@
     "rootDir": "./src",
     "paths": {
       "@sheaf/contract": ["../contract/types/plan.d.ts"],
-      "@sheaf/contract/catalog": ["../contract/types/catalog.d.ts"]
+      "@sheaf/contract/catalog": ["../contract/types/catalog.d.ts"],
+      "@sheaf/contract/unbound": ["../contract/types/unbound-plan.d.ts"],
+      "@sheaf/contract/response": ["../contract/types/planner-response.d.ts"],
+      "@sheaf/contract/commit": ["../contract/types/commit-request.d.ts"]
     },
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

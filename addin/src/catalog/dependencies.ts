@@ -1,5 +1,5 @@
-import type { ColumnDependent, UntraceableReference } from "@sheaf/contract/catalog";
-import { type Box, cellRef, colToLetters, intersects, quoteSheet, sameSheet } from "./a1";
+import type { ColumnDependent, DependentClass, UntraceableReference } from "@sheaf/contract/catalog";
+import { type Box, cellRef, colToLetters, intersects, MAX_COL, MAX_ROW, quoteSheet, sameSheet } from "./a1";
 import { extractReferences, type FormulaRef } from "./formulaRefs";
 import type { NamedItemSnapshot, ReferenceSource } from "./types";
 
@@ -7,6 +7,8 @@ export interface EntityLayout {
   name: string;
   sheet: string;
   box: Box;
+  /** First data row (below the header rows). */
+  dataTop: number;
   tableName?: string;
   /** Absolute 0-based sheet column of each entity column, in entity order. */
   columns: { name: string; col: number }[];
@@ -39,6 +41,38 @@ export function redactLiterals(formula: string): string {
 interface Hit {
   entity: EntityLayout;
   column: string;
+  refClass: DependentClass;
+  /** The reference names particular data rows, so deleting rows can break or change it. */
+  fixedRows: boolean;
+}
+
+/** Wider references rank higher; when one source reads a column several ways, the widest wins. */
+const CLASS_RANK: Record<DependentClass, number> = { exclusive: 0, wholeColumn: 1, wholeRow: 2, spanning: 3 };
+
+function merge(a: Hit, b: Hit): Hit {
+  return {
+    ...a,
+    refClass: CLASS_RANK[b.refClass] > CLASS_RANK[a.refClass] ? b.refClass : a.refClass,
+    fixedRows: a.fixedRows || b.fixedRows,
+  };
+}
+
+/**
+ * How a reference covers an entity:
+ * - wholeRow: whole rows (5:5); removing a column shrinks it, removing the row breaks it.
+ * - spanning: more than one of the entity's columns (A:D, B2:E9); removing one column silently
+ *   changes what it computes.
+ * - wholeColumn: one whole sheet column (C:C).
+ * - exclusive: part of one column (C5, C2:C17).
+ * It names fixed rows unless it covers every data row (a whole column, or the full data range).
+ */
+export function classifyReference(e: EntityLayout, box: Box): { refClass: DependentClass; fixedRows: boolean } {
+  const columns = e.columns.filter((c) => c.col >= box.left && c.col <= box.right).length;
+  const wholeRow = box.left === 0 && box.right === MAX_COL;
+  const wholeColumn = box.top === 1 && box.bottom === MAX_ROW;
+  const refClass: DependentClass = wholeRow ? "wholeRow" : columns > 1 ? "spanning" : wholeColumn ? "wholeColumn" : "exclusive";
+  const fixedRows = !wholeColumn && !(box.top <= e.dataTop && box.bottom >= e.box.bottom);
+  return { refClass, fixedRows };
 }
 
 export interface ResolveOptions {
@@ -70,7 +104,8 @@ export function resolveDependents(
         const hits: Hit[] = [];
         for (const e of entities) {
           if (!sameSheet(e.sheet, sheet) || !intersects(e.box, ref.box)) continue;
-          for (const c of e.columns) if (c.col >= ref.box.left && c.col <= ref.box.right) hits.push({ entity: e, column: c.name });
+          const cls = classifyReference(e, ref.box);
+          for (const c of e.columns) if (c.col >= ref.box.left && c.col <= ref.box.right) hits.push({ entity: e, column: c.name, ...cls });
         }
         return hits;
       }
@@ -79,17 +114,22 @@ export function resolveDependents(
           ref.table ?? (src.row !== undefined && src.col !== undefined ? opts.tableAt?.(src.sheet, src.row, src.col) : undefined);
         const e = tableName ? byTable.get(tableName.toUpperCase()) : undefined;
         if (!e) return [];
-        if (ref.columns === "all") return e.columns.map((c) => ({ entity: e, column: c.name }));
+        const fixedRows = ref.thisRow === true;
+        const hit = (names: string[]): Hit[] => {
+          const refClass: DependentClass = names.length > 1 ? "spanning" : "exclusive";
+          return names.map((column) => ({ entity: e, column, refClass, fixedRows }));
+        };
+        if (ref.columns === "all") return hit(e.columns.map((c) => c.name));
         const index = (n: string) => e.columns.findIndex((c) => c.name.toLowerCase() === n.toLowerCase());
         if (ref.span) {
           const [a, b] = [index(ref.span[0]), index(ref.span[1])];
           if (a < 0 || b < 0) return [];
-          return e.columns.slice(Math.min(a, b), Math.max(a, b) + 1).map((c) => ({ entity: e, column: c.name }));
+          return hit(e.columns.slice(Math.min(a, b), Math.max(a, b) + 1).map((c) => c.name));
         }
-        return ref.columns
+        return hit(ref.columns
           .map(index)
           .filter((i) => i >= 0)
-          .map((i) => ({ entity: e, column: e.columns[i]!.name }));
+          .map((i) => e.columns[i]!.name));
       }
       case "name": {
         const key = ref.name.toUpperCase();
@@ -101,7 +141,8 @@ export function resolveDependents(
     }
   }
 
-  // Formula cells are grouped per sheet column so 4,000 identical formulas become one dependent.
+  // Formula cells are grouped per sheet column (and reference class) so 4,000 identical formulas
+  // become one dependent.
   const formulaGroups = new Map<string, { hit: Hit; sheet: string; col: number; rows: number[]; example: string }>();
   const byColumn = new Map<string, ColumnDependent[]>();
   const add = (key: string, d: ColumnDependent) => {
@@ -122,19 +163,23 @@ export function resolveDependents(
         const inside =
           src.row !== undefined && src.col === col && sameSheet(src.sheet, h.entity.sheet) &&
           src.row >= h.entity.box.top && src.row <= h.entity.box.bottom;
-        if (!inside) hits.set(columnKey(h.entity.name, h.column), h);
+        if (inside) continue;
+        const key = columnKey(h.entity.name, h.column);
+        const seen = hits.get(key);
+        hits.set(key, seen ? merge(seen, h) : h);
       }
     }
 
     const detail = clip(opts.redact ? redactLiterals(src.text) : src.text);
     for (const [key, hit] of hits) {
       if (src.kind === "formula" && src.row !== undefined && src.col !== undefined) {
-        const gk = `${key}\u0000${src.sheet}\u0000${src.col}`;
+        // Filled-down formulas read the column the same way; different readings stay separate groups.
+        const gk = `${key}\u0000${src.sheet}\u0000${src.col}\u0000${hit.refClass}\u0000${hit.fixedRows}`;
         const g = formulaGroups.get(gk) ?? { hit, sheet: src.sheet, col: src.col, rows: [], example: detail };
         g.rows.push(src.row);
         formulaGroups.set(gk, g);
       } else {
-        add(key, { kind: src.kind, location: src.location, detail });
+        add(key, { kind: src.kind, location: src.location, detail, refClass: hit.refClass, fixedRows: hit.fixedRows });
       }
     }
   }
@@ -152,6 +197,8 @@ export function resolveDependents(
         kind: "formula",
         location: `${quoteSheet(g.sheet)}!${loc}`,
         detail: count === 1 ? g.example : `${count} formulas, e.g. ${g.example}`,
+        refClass: g.hit.refClass,
+        fixedRows: g.hit.fixedRows,
       });
     };
     for (const r of rows.slice(1)) {

@@ -1,0 +1,47 @@
+{
+  "question": "fill blank companies with 'Unknown'",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "contact_id: string",
+      "first_name: string",
+      "last_name: string",
+      "email: string",
+      "phone: string",
+      "company: string?",
+      "street: string?",
+      "city: categorical",
+      "postcode: string?",
+      "region: categorical",
+      "signup_date: date",
+      "status: categorical",
+      "fax: string?",
+      "lifetime_value: currency:INR"
+    ],
+    "impact": {
+      "overwritten": [
+        "company"
+      ]
+    }
+  },
+  "plan": {
+    "kind": "edit",
+    "target": "Contacts",
+    "ops": [
+      {
+        "op": "setColumn",
+        "col": "company",
+        "expr": {
+          "type": "lit",
+          "value": "Unknown"
+        },
+        "where": {
+          "op": "isNull",
+          "col": "company"
+        }
+      }
+    ],
+    "params": []
+  }
+}

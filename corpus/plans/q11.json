@@ -1,0 +1,50 @@
+{
+  "question": "revenue this quarter vs last quarter by region",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "region: categorical",
+      "current_revenue: currency:INR?",
+      "prior_revenue: currency:INR?",
+      "delta: currency:INR?",
+      "delta_pct: percent?"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "ne",
+          "left": {
+            "type": "col",
+            "col": "status"
+          },
+          "right": {
+            "type": "lit",
+            "value": "returned"
+          }
+        }
+      },
+      {
+        "op": "periodCompare",
+        "metric": "Revenue",
+        "timeDim": "order_date",
+        "grain": "quarter",
+        "current": "2025-Q1",
+        "prior": "2024-Q4",
+        "groupBy": [
+          "region"
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

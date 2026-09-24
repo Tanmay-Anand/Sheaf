@@ -7,6 +7,7 @@ import java.util.List;
 /**
  * One column of an entity, as inferred by the profiler (and possibly corrected by the user).
  *
+ * @param id             Stable column id, carried over across rescans while the header is unchanged.
  * @param letter         Sheet column letter, e.g. {@code G}.
  * @param index          0-based position within the entity.
  * @param unit           Currency code for {@code currency} columns; absent when unconfirmed.
@@ -17,9 +18,12 @@ import java.util.List;
  * @param dateFormats    Every date format seen, when the column holds dates.
  * @param exemplars      Up to five short sample values; absent when exemplars are switched off.
  * @param validationList Allowed values from an in-cell list validation rule.
+ * @param mayContainErrors    Some cells show an Excel error (#N/A, #DIV/0!…); aggregating them needs consent.
+ * @param numbersStoredAsText Some numbers are stored as text; Excel's SUM silently skips those.
  * @param dependents     Everything in the workbook that references this column.
  */
 public record CatalogColumn(
+        String id,
         String name,
         String letter,
         int index,
@@ -35,6 +39,8 @@ public record CatalogColumn(
         @Nullable List<String> dateFormats,
         @Nullable List<String> exemplars,
         @Nullable List<String> validationList,
+        boolean mayContainErrors,
+        boolean numbersStoredAsText,
         List<ColumnDependent> dependents,
         List<String> warnings
 ) {}

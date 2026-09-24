@@ -37,6 +37,11 @@
         "title" : "CatalogCorrection"
       }
     },
+    "dateSystem" : {
+      "type" : "string",
+      "enum" : [ "1900", "1904", "unknown" ],
+      "title" : "DateSystem"
+    },
     "entities" : {
       "type" : "array",
       "items" : {
@@ -64,6 +69,9 @@
                       "detail" : {
                         "type" : "string"
                       },
+                      "fixedRows" : {
+                        "type" : "boolean"
+                      },
                       "kind" : {
                         "type" : "string",
                         "enum" : [ "formula", "namedRange", "dataValidation", "conditionalFormat", "chartSeries", "pivotTable" ],
@@ -71,9 +79,14 @@
                       },
                       "location" : {
                         "type" : "string"
+                      },
+                      "refClass" : {
+                        "type" : "string",
+                        "enum" : [ "exclusive", "spanning", "wholeColumn", "wholeRow" ],
+                        "title" : "DependentClass"
                       }
                     },
-                    "required" : [ "detail", "kind", "location" ],
+                    "required" : [ "detail", "fixedRows", "kind", "location", "refClass" ],
                     "title" : "ColumnDependent"
                   }
                 },
@@ -89,6 +102,9 @@
                 "formula" : {
                   "type" : "boolean"
                 },
+                "id" : {
+                  "type" : "string"
+                },
                 "index" : {
                   "type" : "integer"
                 },
@@ -101,6 +117,9 @@
                 "letter" : {
                   "type" : "string"
                 },
+                "mayContainErrors" : {
+                  "type" : "boolean"
+                },
                 "name" : {
                   "type" : "string"
                 },
@@ -112,6 +131,9 @@
                 },
                 "numberFormat" : {
                   "type" : "string"
+                },
+                "numbersStoredAsText" : {
+                  "type" : "boolean"
                 },
                 "percentScale" : {
                   "type" : "integer"
@@ -132,7 +154,7 @@
                   }
                 }
               },
-              "required" : [ "dependents", "distinctCount", "formula", "index", "keyCandidate", "kind", "letter", "name", "nullRate", "nullable", "warnings" ],
+              "required" : [ "dependents", "distinctCount", "formula", "id", "index", "keyCandidate", "kind", "letter", "mayContainErrors", "name", "nullRate", "nullable", "numbersStoredAsText", "warnings" ],
               "title" : "CatalogColumn"
             }
           },
@@ -151,6 +173,9 @@
           "headerRows" : {
             "type" : "integer"
           },
+          "id" : {
+            "type" : "string"
+          },
           "kind" : {
             "type" : "string",
             "enum" : [ "table", "region" ],
@@ -163,6 +188,9 @@
             "type" : "string"
           },
           "sheet" : {
+            "type" : "string"
+          },
+          "sheetId" : {
             "type" : "string"
           },
           "skippedRows" : {
@@ -190,7 +218,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "address", "columns", "contentHash", "dataRowCount", "firstDataRow", "headerRow", "headerRows", "kind", "lastDataRow", "name", "sheet", "skippedRows" ],
+        "required" : [ "address", "columns", "contentHash", "dataRowCount", "firstDataRow", "headerRow", "headerRows", "id", "kind", "lastDataRow", "name", "sheet", "sheetId", "skippedRows" ],
         "title" : "CatalogEntity"
       }
     },
@@ -263,6 +291,6 @@
       }
     }
   },
-  "required" : [ "corrections", "entities", "generatedAt", "joinCandidates", "untraceable", "version", "warnings" ],
+  "required" : [ "corrections", "dateSystem", "entities", "generatedAt", "joinCandidates", "untraceable", "version", "warnings" ],
   "title" : "WorkbookCatalog"
 }

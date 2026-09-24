@@ -1,0 +1,62 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "anchor" : {
+      "type" : "object",
+      "properties" : {
+        "address" : {
+          "type" : "string"
+        },
+        "sheetId" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "address", "sheetId" ],
+      "title" : "AnchorChoice"
+    },
+    "excludeErrorCells" : {
+      "type" : "boolean"
+    },
+    "onDependents" : {
+      "type" : "string",
+      "enum" : [ "block", "convertToValues" ],
+      "title" : "OnDependents"
+    },
+    "params" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "value" : { }
+        },
+        "required" : [ "name" ],
+        "title" : "ParamValue"
+      }
+    },
+    "planHash" : {
+      "type" : "string"
+    },
+    "regionHashes" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "contentHash" : {
+            "type" : "string"
+          },
+          "entityId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "contentHash", "entityId" ],
+        "title" : "RegionHash"
+      }
+    }
+  },
+  "required" : [ "excludeErrorCells", "onDependents", "params", "planHash", "regionHashes" ],
+  "title" : "CommitRequest"
+}

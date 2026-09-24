@@ -11,7 +11,7 @@ import { type Box, parseRef } from "./a1";
 
 export type FormulaRef =
   | { kind: "range"; sheet: string | null; box: Box }
-  | { kind: "structured"; table: string | null; columns: string[] | "all"; span?: [string, string] }
+  | { kind: "structured"; table: string | null; columns: string[] | "all"; span?: [string, string]; thisRow?: boolean }
   | { kind: "name"; name: string };
 
 export interface ExtractResult {
@@ -56,17 +56,19 @@ function unescapeColumn(name: string): string {
   return name.replace(/'(.)/g, "$1").trim();
 }
 
-function parseStructured(inner: string): { columns: string[] | "all"; span?: [string, string] } {
+function parseStructured(inner: string): { columns: string[] | "all"; span?: [string, string]; thisRow?: boolean } {
+  // [@Col] and [[#This Row],[Col]] name one row: deleting that row breaks the reference.
+  const thisRow = /^\s*@/.test(inner) || /#this row/i.test(inner) ? { thisRow: true } : {};
   if (!inner.includes("[")) {
-    const item = inner.replace(/^@/, "").trim();
-    if (item === "" || item.startsWith("#")) return { columns: "all" };
-    return { columns: [unescapeColumn(item)] };
+    const item = inner.replace(/^\s*@/, "").trim();
+    if (item === "" || item.startsWith("#")) return { columns: "all", ...thisRow };
+    return { columns: [unescapeColumn(item)], ...thisRow };
   }
-  const items = [...inner.matchAll(/\[((?:[^[\]']|'.)*)\]/g)].map((m) => m[1]!);
+  const items = [...inner.replace(/^\s*@/, "").matchAll(/\[((?:[^[\]']|'.)*)\]/g)].map((m) => m[1]!);
   const cols = items.filter((i) => !i.trim().startsWith("#")).map(unescapeColumn);
-  if (cols.length === 0) return { columns: "all" };
-  if (/\]\s*:\s*\[/.test(inner) && cols.length === 2) return { columns: cols, span: [cols[0]!, cols[1]!] };
-  return { columns: cols };
+  if (cols.length === 0) return { columns: "all", ...thisRow };
+  if (/\]\s*:\s*\[/.test(inner) && cols.length === 2) return { columns: cols, span: [cols[0]!, cols[1]!], ...thisRow };
+  return { columns: cols, ...thisRow };
 }
 
 export function extractReferences(text: string): ExtractResult {

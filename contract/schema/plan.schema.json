@@ -28,11 +28,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -41,6 +41,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         },
         "b" : {
@@ -67,11 +81,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -80,6 +94,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         }
       },
@@ -95,6 +123,19 @@
         }
       },
       "required" : [ "type" ]
+    },
+    "After" : {
+      "type" : "object",
+      "properties" : {
+        "column" : {
+          "type" : "string"
+        },
+        "at" : {
+          "const" : "after"
+        }
+      },
+      "required" : [ "column", "at" ],
+      "title" : "After"
     },
     "AndPredicate-1" : {
       "type" : "object",
@@ -144,6 +185,48 @@
         }
       },
       "required" : [ "op" ]
+    },
+    "Bindings" : {
+      "type" : "object",
+      "properties" : {
+        "entities" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "columns" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "properties" : {
+                    "id" : {
+                      "type" : "string"
+                    },
+                    "name" : {
+                      "type" : "string"
+                    }
+                  },
+                  "required" : [ "id", "name" ],
+                  "title" : "ColumnBinding"
+                }
+              },
+              "id" : {
+                "type" : "string"
+              },
+              "name" : {
+                "type" : "string"
+              },
+              "sheetId" : {
+                "type" : "string"
+              }
+            },
+            "required" : [ "columns", "id", "name", "sheetId" ],
+            "title" : "EntityBinding"
+          }
+        }
+      },
+      "required" : [ "entities" ],
+      "title" : "Bindings"
     },
     "BucketExpr" : {
       "type" : "object",
@@ -197,11 +280,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -210,6 +293,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         },
         "when" : {
@@ -251,6 +348,8 @@
                   "$ref" : "#/$defs/ColRef-1"
                 }, {
                   "$ref" : "#/$defs/Lit-1"
+                }, {
+                  "$ref" : "#/$defs/ParamRef-1"
                 } ]
               }
             },
@@ -301,11 +400,11 @@
             }, {
               "$ref" : "#/$defs/MonthOfExpr"
             }, {
-              "$ref" : "#/$defs/WeekOfExpr"
+              "$ref" : "#/$defs/IsoWeekOfExpr"
             }, {
               "$ref" : "#/$defs/DayOfExpr"
             }, {
-              "$ref" : "#/$defs/DayOfWeekExpr"
+              "$ref" : "#/$defs/IsoDayOfWeekExpr"
             }, {
               "$ref" : "#/$defs/BucketExpr"
             }, {
@@ -314,6 +413,20 @@
               "$ref" : "#/$defs/CaseExpr-2"
             }, {
               "$ref" : "#/$defs/SumAllExpr"
+            }, {
+              "$ref" : "#/$defs/ConcatExpr-2"
+            }, {
+              "$ref" : "#/$defs/TrimExpr-2"
+            }, {
+              "$ref" : "#/$defs/UpperExpr-2"
+            }, {
+              "$ref" : "#/$defs/LowerExpr-2"
+            }, {
+              "$ref" : "#/$defs/SplitPartExpr-2"
+            }, {
+              "$ref" : "#/$defs/ToTextExpr-2"
+            }, {
+              "$ref" : "#/$defs/ParamRef-2"
             } ]
           }
         }
@@ -357,6 +470,85 @@
       "required" : [ "col", "type" ],
       "title" : "ColRef"
     },
+    "ConcatExpr-1" : {
+      "type" : "object",
+      "properties" : {
+        "parts" : {
+          "type" : "array",
+          "items" : {
+            "anyOf" : [ {
+              "$ref" : "#/$defs/ColRef-2"
+            }, {
+              "$ref" : "#/$defs/Lit-2"
+            }, {
+              "$ref" : "#/$defs/AddExpr-2"
+            }, {
+              "$ref" : "#/$defs/SubExpr-2"
+            }, {
+              "$ref" : "#/$defs/MulExpr-2"
+            }, {
+              "$ref" : "#/$defs/DivExpr-2"
+            }, {
+              "$ref" : "#/$defs/RatioExpr-2"
+            }, {
+              "$ref" : "#/$defs/PctExpr-2"
+            }, {
+              "$ref" : "#/$defs/YearOfExpr"
+            }, {
+              "$ref" : "#/$defs/QuarterOfExpr"
+            }, {
+              "$ref" : "#/$defs/MonthOfExpr"
+            }, {
+              "$ref" : "#/$defs/IsoWeekOfExpr"
+            }, {
+              "$ref" : "#/$defs/DayOfExpr"
+            }, {
+              "$ref" : "#/$defs/IsoDayOfWeekExpr"
+            }, {
+              "$ref" : "#/$defs/BucketExpr"
+            }, {
+              "$ref" : "#/$defs/CoalesceExpr-2"
+            }, {
+              "$ref" : "#/$defs/CaseExpr-2"
+            }, {
+              "$ref" : "#/$defs/SumAllExpr"
+            }, {
+              "$ref" : "#/$defs/ConcatExpr-2"
+            }, {
+              "$ref" : "#/$defs/TrimExpr-2"
+            }, {
+              "$ref" : "#/$defs/UpperExpr-2"
+            }, {
+              "$ref" : "#/$defs/LowerExpr-2"
+            }, {
+              "$ref" : "#/$defs/SplitPartExpr-2"
+            }, {
+              "$ref" : "#/$defs/ToTextExpr-2"
+            }, {
+              "$ref" : "#/$defs/ParamRef-2"
+            } ]
+          }
+        },
+        "sep" : {
+          "type" : "string"
+        },
+        "skipNulls" : {
+          "type" : "boolean"
+        }
+      },
+      "required" : [ "parts" ],
+      "title" : "ConcatExpr"
+    },
+    "ConcatExpr-2" : {
+      "$ref" : "#/$defs/ConcatExpr-1",
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "const" : "concat"
+        }
+      },
+      "required" : [ "type" ]
+    },
     "DayOfExpr" : {
       "type" : "object",
       "properties" : {
@@ -369,19 +561,6 @@
       },
       "required" : [ "col", "type" ],
       "title" : "DayOfExpr"
-    },
-    "DayOfWeekExpr" : {
-      "type" : "object",
-      "properties" : {
-        "col" : {
-          "type" : "string"
-        },
-        "type" : {
-          "const" : "dayOfWeek"
-        }
-      },
-      "required" : [ "col", "type" ],
-      "title" : "DayOfWeekExpr"
     },
     "DivExpr-1" : {
       "type" : "object",
@@ -410,11 +589,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -423,6 +602,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         },
         "b" : {
@@ -449,11 +642,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -462,6 +655,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         }
       },
@@ -486,6 +693,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "right" : {
@@ -493,6 +702,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "op" : {
@@ -502,6 +713,16 @@
       "required" : [ "left", "right", "op" ],
       "title" : "EqPredicate"
     },
+    "First" : {
+      "type" : "object",
+      "title" : "First",
+      "properties" : {
+        "at" : {
+          "const" : "first"
+        }
+      },
+      "required" : [ "at" ]
+    },
     "GtPredicate" : {
       "type" : "object",
       "properties" : {
@@ -510,6 +731,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "right" : {
@@ -517,6 +740,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "op" : {
@@ -534,6 +759,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "right" : {
@@ -541,6 +768,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "op" : {
@@ -593,10 +822,62 @@
       "required" : [ "col", "op" ],
       "title" : "IsNullPredicate"
     },
+    "IsoDayOfWeekExpr" : {
+      "type" : "object",
+      "properties" : {
+        "col" : {
+          "type" : "string"
+        },
+        "type" : {
+          "const" : "isoDayOfWeek"
+        }
+      },
+      "required" : [ "col", "type" ],
+      "title" : "IsoDayOfWeekExpr"
+    },
+    "IsoWeekOfExpr" : {
+      "type" : "object",
+      "properties" : {
+        "col" : {
+          "type" : "string"
+        },
+        "type" : {
+          "const" : "isoWeekOf"
+        }
+      },
+      "required" : [ "col", "type" ],
+      "title" : "IsoWeekOfExpr"
+    },
+    "JoinKey" : {
+      "type" : "object",
+      "properties" : {
+        "left" : {
+          "type" : "string"
+        },
+        "right" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "left", "right" ],
+      "title" : "JoinKey"
+    },
+    "Last" : {
+      "type" : "object",
+      "title" : "Last",
+      "properties" : {
+        "at" : {
+          "const" : "last"
+        }
+      },
+      "required" : [ "at" ]
+    },
     "Lit-1" : {
       "type" : "object",
       "properties" : {
         "value" : { },
+        "valueType" : {
+          "$ref" : "#/$defs/ValueType"
+        },
         "type" : {
           "const" : "lit"
         }
@@ -608,11 +889,84 @@
       "type" : "object",
       "properties" : {
         "value" : { },
+        "valueType" : {
+          "$ref" : "#/$defs/ValueType"
+        },
         "type" : {
           "const" : "lit"
         }
       },
       "title" : "Lit",
+      "required" : [ "type" ]
+    },
+    "LowerExpr-1" : {
+      "type" : "object",
+      "properties" : {
+        "arg" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/ColRef-2"
+          }, {
+            "$ref" : "#/$defs/Lit-2"
+          }, {
+            "$ref" : "#/$defs/AddExpr-2"
+          }, {
+            "$ref" : "#/$defs/SubExpr-2"
+          }, {
+            "$ref" : "#/$defs/MulExpr-2"
+          }, {
+            "$ref" : "#/$defs/DivExpr-2"
+          }, {
+            "$ref" : "#/$defs/RatioExpr-2"
+          }, {
+            "$ref" : "#/$defs/PctExpr-2"
+          }, {
+            "$ref" : "#/$defs/YearOfExpr"
+          }, {
+            "$ref" : "#/$defs/QuarterOfExpr"
+          }, {
+            "$ref" : "#/$defs/MonthOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoWeekOfExpr"
+          }, {
+            "$ref" : "#/$defs/DayOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
+          }, {
+            "$ref" : "#/$defs/BucketExpr"
+          }, {
+            "$ref" : "#/$defs/CoalesceExpr-2"
+          }, {
+            "$ref" : "#/$defs/CaseExpr-2"
+          }, {
+            "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
+          } ]
+        }
+      },
+      "required" : [ "arg" ],
+      "title" : "LowerExpr"
+    },
+    "LowerExpr-2" : {
+      "$ref" : "#/$defs/LowerExpr-1",
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "const" : "lower"
+        }
+      },
       "required" : [ "type" ]
     },
     "LtPredicate" : {
@@ -623,6 +977,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "right" : {
@@ -630,6 +986,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "op" : {
@@ -647,6 +1005,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "right" : {
@@ -654,6 +1014,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "op" : {
@@ -703,11 +1065,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -716,6 +1078,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         },
         "b" : {
@@ -742,11 +1118,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -755,6 +1131,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         }
       },
@@ -779,6 +1169,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "right" : {
@@ -786,6 +1178,8 @@
             "$ref" : "#/$defs/ColRef-1"
           }, {
             "$ref" : "#/$defs/Lit-1"
+          }, {
+            "$ref" : "#/$defs/ParamRef-1"
           } ]
         },
         "op" : {
@@ -907,6 +1301,45 @@
       },
       "required" : [ "op" ]
     },
+    "ParamDecl" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "valueType" : {
+          "$ref" : "#/$defs/ValueType"
+        }
+      },
+      "required" : [ "name", "valueType" ],
+      "title" : "ParamDecl"
+    },
+    "ParamRef-1" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "type" : {
+          "const" : "param"
+        }
+      },
+      "required" : [ "name", "type" ],
+      "title" : "ParamRef"
+    },
+    "ParamRef-2" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "type" : {
+          "const" : "param"
+        }
+      },
+      "required" : [ "name", "type" ],
+      "title" : "ParamRef"
+    },
     "PctExpr-1" : {
       "type" : "object",
       "properties" : {
@@ -934,11 +1367,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -947,6 +1380,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         },
         "numerator" : {
@@ -973,11 +1420,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -986,6 +1433,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         }
       },
@@ -1042,11 +1503,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -1055,6 +1516,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         },
         "numerator" : {
@@ -1081,11 +1556,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -1094,6 +1569,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         }
       },
@@ -1106,6 +1595,82 @@
       "properties" : {
         "type" : {
           "const" : "ratio"
+        }
+      },
+      "required" : [ "type" ]
+    },
+    "SplitPartExpr-1" : {
+      "type" : "object",
+      "properties" : {
+        "arg" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/ColRef-2"
+          }, {
+            "$ref" : "#/$defs/Lit-2"
+          }, {
+            "$ref" : "#/$defs/AddExpr-2"
+          }, {
+            "$ref" : "#/$defs/SubExpr-2"
+          }, {
+            "$ref" : "#/$defs/MulExpr-2"
+          }, {
+            "$ref" : "#/$defs/DivExpr-2"
+          }, {
+            "$ref" : "#/$defs/RatioExpr-2"
+          }, {
+            "$ref" : "#/$defs/PctExpr-2"
+          }, {
+            "$ref" : "#/$defs/YearOfExpr"
+          }, {
+            "$ref" : "#/$defs/QuarterOfExpr"
+          }, {
+            "$ref" : "#/$defs/MonthOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoWeekOfExpr"
+          }, {
+            "$ref" : "#/$defs/DayOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
+          }, {
+            "$ref" : "#/$defs/BucketExpr"
+          }, {
+            "$ref" : "#/$defs/CoalesceExpr-2"
+          }, {
+            "$ref" : "#/$defs/CaseExpr-2"
+          }, {
+            "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
+          } ]
+        },
+        "index" : {
+          "type" : "integer"
+        },
+        "sep" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "arg", "index", "sep" ],
+      "title" : "SplitPartExpr"
+    },
+    "SplitPartExpr-2" : {
+      "$ref" : "#/$defs/SplitPartExpr-1",
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "const" : "splitPart"
         }
       },
       "required" : [ "type" ]
@@ -1137,11 +1702,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -1150,6 +1715,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         },
         "b" : {
@@ -1176,11 +1755,11 @@
           }, {
             "$ref" : "#/$defs/MonthOfExpr"
           }, {
-            "$ref" : "#/$defs/WeekOfExpr"
+            "$ref" : "#/$defs/IsoWeekOfExpr"
           }, {
             "$ref" : "#/$defs/DayOfExpr"
           }, {
-            "$ref" : "#/$defs/DayOfWeekExpr"
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
           }, {
             "$ref" : "#/$defs/BucketExpr"
           }, {
@@ -1189,6 +1768,20 @@
             "$ref" : "#/$defs/CaseExpr-2"
           }, {
             "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
           } ]
         }
       },
@@ -1218,18 +1811,223 @@
       "required" : [ "col", "type" ],
       "title" : "SumAllExpr"
     },
-    "WeekOfExpr" : {
+    "ToTextExpr-1" : {
       "type" : "object",
       "properties" : {
-        "col" : {
-          "type" : "string"
+        "arg" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/ColRef-2"
+          }, {
+            "$ref" : "#/$defs/Lit-2"
+          }, {
+            "$ref" : "#/$defs/AddExpr-2"
+          }, {
+            "$ref" : "#/$defs/SubExpr-2"
+          }, {
+            "$ref" : "#/$defs/MulExpr-2"
+          }, {
+            "$ref" : "#/$defs/DivExpr-2"
+          }, {
+            "$ref" : "#/$defs/RatioExpr-2"
+          }, {
+            "$ref" : "#/$defs/PctExpr-2"
+          }, {
+            "$ref" : "#/$defs/YearOfExpr"
+          }, {
+            "$ref" : "#/$defs/QuarterOfExpr"
+          }, {
+            "$ref" : "#/$defs/MonthOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoWeekOfExpr"
+          }, {
+            "$ref" : "#/$defs/DayOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
+          }, {
+            "$ref" : "#/$defs/BucketExpr"
+          }, {
+            "$ref" : "#/$defs/CoalesceExpr-2"
+          }, {
+            "$ref" : "#/$defs/CaseExpr-2"
+          }, {
+            "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
+          } ]
         },
-        "type" : {
-          "const" : "weekOf"
+        "pattern" : {
+          "type" : "string"
         }
       },
-      "required" : [ "col", "type" ],
-      "title" : "WeekOfExpr"
+      "required" : [ "arg", "pattern" ],
+      "title" : "ToTextExpr"
+    },
+    "ToTextExpr-2" : {
+      "$ref" : "#/$defs/ToTextExpr-1",
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "const" : "toText"
+        }
+      },
+      "required" : [ "type" ]
+    },
+    "TrimExpr-1" : {
+      "type" : "object",
+      "properties" : {
+        "arg" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/ColRef-2"
+          }, {
+            "$ref" : "#/$defs/Lit-2"
+          }, {
+            "$ref" : "#/$defs/AddExpr-2"
+          }, {
+            "$ref" : "#/$defs/SubExpr-2"
+          }, {
+            "$ref" : "#/$defs/MulExpr-2"
+          }, {
+            "$ref" : "#/$defs/DivExpr-2"
+          }, {
+            "$ref" : "#/$defs/RatioExpr-2"
+          }, {
+            "$ref" : "#/$defs/PctExpr-2"
+          }, {
+            "$ref" : "#/$defs/YearOfExpr"
+          }, {
+            "$ref" : "#/$defs/QuarterOfExpr"
+          }, {
+            "$ref" : "#/$defs/MonthOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoWeekOfExpr"
+          }, {
+            "$ref" : "#/$defs/DayOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
+          }, {
+            "$ref" : "#/$defs/BucketExpr"
+          }, {
+            "$ref" : "#/$defs/CoalesceExpr-2"
+          }, {
+            "$ref" : "#/$defs/CaseExpr-2"
+          }, {
+            "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
+          } ]
+        }
+      },
+      "required" : [ "arg" ],
+      "title" : "TrimExpr"
+    },
+    "TrimExpr-2" : {
+      "$ref" : "#/$defs/TrimExpr-1",
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "const" : "trim"
+        }
+      },
+      "required" : [ "type" ]
+    },
+    "UpperExpr-1" : {
+      "type" : "object",
+      "properties" : {
+        "arg" : {
+          "anyOf" : [ {
+            "$ref" : "#/$defs/ColRef-2"
+          }, {
+            "$ref" : "#/$defs/Lit-2"
+          }, {
+            "$ref" : "#/$defs/AddExpr-2"
+          }, {
+            "$ref" : "#/$defs/SubExpr-2"
+          }, {
+            "$ref" : "#/$defs/MulExpr-2"
+          }, {
+            "$ref" : "#/$defs/DivExpr-2"
+          }, {
+            "$ref" : "#/$defs/RatioExpr-2"
+          }, {
+            "$ref" : "#/$defs/PctExpr-2"
+          }, {
+            "$ref" : "#/$defs/YearOfExpr"
+          }, {
+            "$ref" : "#/$defs/QuarterOfExpr"
+          }, {
+            "$ref" : "#/$defs/MonthOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoWeekOfExpr"
+          }, {
+            "$ref" : "#/$defs/DayOfExpr"
+          }, {
+            "$ref" : "#/$defs/IsoDayOfWeekExpr"
+          }, {
+            "$ref" : "#/$defs/BucketExpr"
+          }, {
+            "$ref" : "#/$defs/CoalesceExpr-2"
+          }, {
+            "$ref" : "#/$defs/CaseExpr-2"
+          }, {
+            "$ref" : "#/$defs/SumAllExpr"
+          }, {
+            "$ref" : "#/$defs/ConcatExpr-2"
+          }, {
+            "$ref" : "#/$defs/TrimExpr-2"
+          }, {
+            "$ref" : "#/$defs/UpperExpr-2"
+          }, {
+            "$ref" : "#/$defs/LowerExpr-2"
+          }, {
+            "$ref" : "#/$defs/SplitPartExpr-2"
+          }, {
+            "$ref" : "#/$defs/ToTextExpr-2"
+          }, {
+            "$ref" : "#/$defs/ParamRef-2"
+          } ]
+        }
+      },
+      "required" : [ "arg" ],
+      "title" : "UpperExpr"
+    },
+    "UpperExpr-2" : {
+      "$ref" : "#/$defs/UpperExpr-1",
+      "type" : "object",
+      "properties" : {
+        "type" : {
+          "const" : "upper"
+        }
+      },
+      "required" : [ "type" ]
+    },
+    "ValueType" : {
+      "type" : "string",
+      "enum" : [ "string", "number", "boolean", "date", "datetime" ],
+      "title" : "ValueType"
     },
     "YearOfExpr" : {
       "type" : "object",
@@ -1247,183 +2045,599 @@
   },
   "type" : "object",
   "properties" : {
-    "meta" : {
-      "type" : "object",
-      "properties" : {
-        "generatedAt" : {
-          "type" : "string",
-          "format" : "date-time"
-        },
-        "modelId" : {
-          "type" : "string"
-        },
-        "planHash" : {
-          "type" : "string"
-        },
-        "promptVersion" : {
-          "type" : "string"
-        }
-      },
-      "required" : [ "generatedAt", "modelId", "planHash", "promptVersion" ],
-      "title" : "PlanMeta"
+    "irVersion" : {
+      "type" : "string"
     },
-    "sink" : {
+    "plan" : {
       "anyOf" : [ {
         "type" : "object",
         "properties" : {
-          "anchor" : {
-            "type" : "string"
+          "bindings" : {
+            "$ref" : "#/$defs/Bindings"
           },
-          "name" : {
-            "type" : "string"
-          },
-          "mode" : {
-            "const" : "newSheet"
-          }
-        },
-        "required" : [ "anchor", "name", "mode" ],
-        "title" : "NewSheetSink"
-      }, {
-        "type" : "object",
-        "properties" : {
-          "expectedCols" : {
-            "type" : "integer"
-          },
-          "range" : {
-            "type" : "string"
-          },
-          "mode" : {
-            "const" : "existingAnchor"
-          }
-        },
-        "required" : [ "expectedCols", "range", "mode" ],
-        "title" : "ExistingAnchorSink"
-      } ]
-    },
-    "source" : {
-      "type" : "object",
-      "properties" : {
-        "ref" : {
-          "type" : "string"
-        }
-      },
-      "required" : [ "ref" ],
-      "title" : "EntityRef"
-    },
-    "steps" : {
-      "type" : "array",
-      "items" : {
-        "anyOf" : [ {
-          "type" : "object",
-          "properties" : {
-            "predicate" : {
-              "anyOf" : [ {
-                "$ref" : "#/$defs/EqPredicate"
-              }, {
-                "$ref" : "#/$defs/NePredicate"
-              }, {
-                "$ref" : "#/$defs/LtPredicate"
-              }, {
-                "$ref" : "#/$defs/LtePredicate"
-              }, {
-                "$ref" : "#/$defs/GtPredicate"
-              }, {
-                "$ref" : "#/$defs/GtePredicate"
-              }, {
-                "$ref" : "#/$defs/InPredicate"
-              }, {
-                "$ref" : "#/$defs/NotInPredicate"
-              }, {
-                "$ref" : "#/$defs/IsNullPredicate"
-              }, {
-                "$ref" : "#/$defs/IsNotNullPredicate"
-              }, {
-                "$ref" : "#/$defs/AndPredicate-2"
-              }, {
-                "$ref" : "#/$defs/OrPredicate-2"
-              }, {
-                "$ref" : "#/$defs/NotPredicate-2"
-              } ]
-            },
-            "op" : {
-              "const" : "filter"
+          "params" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/$defs/ParamDecl"
             }
           },
-          "required" : [ "predicate", "op" ],
-          "title" : "FilterStep"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "as" : {
-              "type" : "string"
-            },
-            "expr" : {
-              "anyOf" : [ {
-                "$ref" : "#/$defs/ColRef-2"
-              }, {
-                "$ref" : "#/$defs/Lit-2"
-              }, {
-                "$ref" : "#/$defs/AddExpr-2"
-              }, {
-                "$ref" : "#/$defs/SubExpr-2"
-              }, {
-                "$ref" : "#/$defs/MulExpr-2"
-              }, {
-                "$ref" : "#/$defs/DivExpr-2"
-              }, {
-                "$ref" : "#/$defs/RatioExpr-2"
-              }, {
-                "$ref" : "#/$defs/PctExpr-2"
-              }, {
-                "$ref" : "#/$defs/YearOfExpr"
-              }, {
-                "$ref" : "#/$defs/QuarterOfExpr"
-              }, {
-                "$ref" : "#/$defs/MonthOfExpr"
-              }, {
-                "$ref" : "#/$defs/WeekOfExpr"
-              }, {
-                "$ref" : "#/$defs/DayOfExpr"
-              }, {
-                "$ref" : "#/$defs/DayOfWeekExpr"
-              }, {
-                "$ref" : "#/$defs/BucketExpr"
-              }, {
-                "$ref" : "#/$defs/CoalesceExpr-2"
-              }, {
-                "$ref" : "#/$defs/CaseExpr-2"
-              }, {
-                "$ref" : "#/$defs/SumAllExpr"
-              } ]
-            },
-            "op" : {
-              "const" : "derive"
-            }
+          "sink" : {
+            "anyOf" : [ {
+              "type" : "object",
+              "properties" : {
+                "anchor" : {
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string"
+                },
+                "mode" : {
+                  "const" : "newSheet"
+                }
+              },
+              "required" : [ "anchor", "name", "mode" ],
+              "title" : "NewSheetSink"
+            }, {
+              "type" : "object",
+              "title" : "AnchorSink",
+              "properties" : {
+                "mode" : {
+                  "const" : "anchor"
+                }
+              },
+              "required" : [ "mode" ]
+            }, {
+              "type" : "object",
+              "properties" : {
+                "firstDataRow" : {
+                  "type" : "integer"
+                },
+                "headerRow" : {
+                  "type" : "integer"
+                },
+                "templateId" : {
+                  "type" : "string"
+                },
+                "mode" : {
+                  "const" : "template"
+                }
+              },
+              "required" : [ "firstDataRow", "headerRow", "templateId", "mode" ],
+              "title" : "TemplateSink"
+            } ]
           },
-          "required" : [ "as", "expr", "op" ],
-          "title" : "DeriveStep"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "groupBy" : {
-              "type" : "array",
-              "items" : {
-                "type" : "string"
-              }
-            },
-            "measures" : {
-              "type" : "array",
-              "items" : {
+          "source" : {
+            "type" : "string"
+          },
+          "steps" : {
+            "type" : "array",
+            "items" : {
+              "anyOf" : [ {
+                "type" : "object",
+                "properties" : {
+                  "predicate" : {
+                    "anyOf" : [ {
+                      "$ref" : "#/$defs/EqPredicate"
+                    }, {
+                      "$ref" : "#/$defs/NePredicate"
+                    }, {
+                      "$ref" : "#/$defs/LtPredicate"
+                    }, {
+                      "$ref" : "#/$defs/LtePredicate"
+                    }, {
+                      "$ref" : "#/$defs/GtPredicate"
+                    }, {
+                      "$ref" : "#/$defs/GtePredicate"
+                    }, {
+                      "$ref" : "#/$defs/InPredicate"
+                    }, {
+                      "$ref" : "#/$defs/NotInPredicate"
+                    }, {
+                      "$ref" : "#/$defs/IsNullPredicate"
+                    }, {
+                      "$ref" : "#/$defs/IsNotNullPredicate"
+                    }, {
+                      "$ref" : "#/$defs/AndPredicate-2"
+                    }, {
+                      "$ref" : "#/$defs/OrPredicate-2"
+                    }, {
+                      "$ref" : "#/$defs/NotPredicate-2"
+                    } ]
+                  },
+                  "op" : {
+                    "const" : "filter"
+                  }
+                },
+                "required" : [ "predicate", "op" ],
+                "title" : "FilterStep"
+              }, {
                 "type" : "object",
                 "properties" : {
                   "as" : {
                     "type" : "string"
                   },
-                  "fn" : {
+                  "expr" : {
+                    "anyOf" : [ {
+                      "$ref" : "#/$defs/ColRef-2"
+                    }, {
+                      "$ref" : "#/$defs/Lit-2"
+                    }, {
+                      "$ref" : "#/$defs/AddExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/SubExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/MulExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/DivExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/RatioExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/PctExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/YearOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/QuarterOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/MonthOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/IsoWeekOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/DayOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/IsoDayOfWeekExpr"
+                    }, {
+                      "$ref" : "#/$defs/BucketExpr"
+                    }, {
+                      "$ref" : "#/$defs/CoalesceExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/CaseExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/SumAllExpr"
+                    }, {
+                      "$ref" : "#/$defs/ConcatExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/TrimExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/UpperExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/LowerExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/SplitPartExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/ToTextExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/ParamRef-2"
+                    } ]
+                  },
+                  "op" : {
+                    "const" : "derive"
+                  }
+                },
+                "required" : [ "as", "expr", "op" ],
+                "title" : "DeriveStep"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "groupBy" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "measures" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "as" : {
+                          "type" : "string"
+                        },
+                        "fn" : {
+                          "type" : "string",
+                          "enum" : [ "count", "countDistinct", "countIf", "sum", "avg", "min", "max" ],
+                          "title" : "AggFn"
+                        },
+                        "of" : {
+                          "type" : "string"
+                        },
+                        "where" : {
+                          "anyOf" : [ {
+                            "$ref" : "#/$defs/EqPredicate"
+                          }, {
+                            "$ref" : "#/$defs/NePredicate"
+                          }, {
+                            "$ref" : "#/$defs/LtPredicate"
+                          }, {
+                            "$ref" : "#/$defs/LtePredicate"
+                          }, {
+                            "$ref" : "#/$defs/GtPredicate"
+                          }, {
+                            "$ref" : "#/$defs/GtePredicate"
+                          }, {
+                            "$ref" : "#/$defs/InPredicate"
+                          }, {
+                            "$ref" : "#/$defs/NotInPredicate"
+                          }, {
+                            "$ref" : "#/$defs/IsNullPredicate"
+                          }, {
+                            "$ref" : "#/$defs/IsNotNullPredicate"
+                          }, {
+                            "$ref" : "#/$defs/AndPredicate-2"
+                          }, {
+                            "$ref" : "#/$defs/OrPredicate-2"
+                          }, {
+                            "$ref" : "#/$defs/NotPredicate-2"
+                          } ]
+                        }
+                      },
+                      "required" : [ "as", "fn", "of" ],
+                      "title" : "AggregateMeasure"
+                    }
+                  },
+                  "op" : {
+                    "const" : "aggregate"
+                  }
+                },
+                "required" : [ "groupBy", "measures", "op" ],
+                "title" : "AggregateStep"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "by" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "col" : {
+                          "type" : "string"
+                        },
+                        "dir" : {
+                          "type" : "string",
+                          "enum" : [ "asc", "desc" ],
+                          "title" : "SortDir"
+                        }
+                      },
+                      "required" : [ "col", "dir" ],
+                      "title" : "SortKey"
+                    }
+                  },
+                  "op" : {
+                    "const" : "sort"
+                  }
+                },
+                "required" : [ "by", "op" ],
+                "title" : "SortStep"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "n" : {
+                    "type" : "integer"
+                  },
+                  "op" : {
+                    "const" : "limit"
+                  }
+                },
+                "required" : [ "n", "op" ],
+                "title" : "LimitStep"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "kind" : {
+                    "type" : "string",
+                    "enum" : [ "inner", "left" ],
+                    "title" : "JoinKind"
+                  },
+                  "on" : {
+                    "$ref" : "#/$defs/JoinKey"
+                  },
+                  "with" : {
                     "type" : "string"
                   },
-                  "of" : {
+                  "op" : {
+                    "const" : "join"
+                  }
+                },
+                "required" : [ "kind", "on", "with", "op" ],
+                "title" : "JoinStep"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "cols" : {
                     "type" : "string"
+                  },
+                  "rows" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "values" : {
+                    "type" : "string"
+                  },
+                  "op" : {
+                    "const" : "pivot"
+                  }
+                },
+                "required" : [ "cols", "rows", "values", "op" ],
+                "title" : "PivotStep"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "current" : {
+                    "type" : "string"
+                  },
+                  "grain" : {
+                    "type" : "string",
+                    "enum" : [ "day", "week", "month", "quarter", "year" ],
+                    "title" : "Grain"
+                  },
+                  "groupBy" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "metric" : {
+                    "type" : "string"
+                  },
+                  "prior" : {
+                    "type" : "string"
+                  },
+                  "timeDim" : {
+                    "type" : "string"
+                  },
+                  "op" : {
+                    "const" : "periodCompare"
+                  }
+                },
+                "required" : [ "current", "grain", "metric", "prior", "timeDim", "op" ],
+                "title" : "PeriodCompareStep"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "columns" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "properties" : {
+                        "as" : {
+                          "type" : "string"
+                        },
+                        "expr" : {
+                          "anyOf" : [ {
+                            "$ref" : "#/$defs/ColRef-2"
+                          }, {
+                            "$ref" : "#/$defs/Lit-2"
+                          }, {
+                            "$ref" : "#/$defs/AddExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/SubExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/MulExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/DivExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/RatioExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/PctExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/YearOfExpr"
+                          }, {
+                            "$ref" : "#/$defs/QuarterOfExpr"
+                          }, {
+                            "$ref" : "#/$defs/MonthOfExpr"
+                          }, {
+                            "$ref" : "#/$defs/IsoWeekOfExpr"
+                          }, {
+                            "$ref" : "#/$defs/DayOfExpr"
+                          }, {
+                            "$ref" : "#/$defs/IsoDayOfWeekExpr"
+                          }, {
+                            "$ref" : "#/$defs/BucketExpr"
+                          }, {
+                            "$ref" : "#/$defs/CoalesceExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/CaseExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/SumAllExpr"
+                          }, {
+                            "$ref" : "#/$defs/ConcatExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/TrimExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/UpperExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/LowerExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/SplitPartExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/ToTextExpr-2"
+                          }, {
+                            "$ref" : "#/$defs/ParamRef-2"
+                          } ]
+                        }
+                      },
+                      "required" : [ "as", "expr" ],
+                      "title" : "ProjectColumn"
+                    }
+                  },
+                  "op" : {
+                    "const" : "project"
+                  }
+                },
+                "required" : [ "columns", "op" ],
+                "title" : "ProjectStep"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "on" : {
+                    "$ref" : "#/$defs/JoinKey"
+                  },
+                  "take" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  },
+                  "with" : {
+                    "type" : "string"
+                  },
+                  "op" : {
+                    "const" : "lookup"
+                  }
+                },
+                "required" : [ "on", "with", "op" ],
+                "title" : "LookupStep"
+              } ]
+            }
+          },
+          "kind" : {
+            "const" : "query"
+          }
+        },
+        "required" : [ "bindings", "params", "sink", "source", "steps", "kind" ],
+        "title" : "QueryPlan"
+      }, {
+        "type" : "object",
+        "properties" : {
+          "bindings" : {
+            "$ref" : "#/$defs/Bindings"
+          },
+          "ops" : {
+            "type" : "array",
+            "items" : {
+              "anyOf" : [ {
+                "type" : "object",
+                "properties" : {
+                  "as" : {
+                    "type" : "string"
+                  },
+                  "expr" : {
+                    "anyOf" : [ {
+                      "$ref" : "#/$defs/ColRef-2"
+                    }, {
+                      "$ref" : "#/$defs/Lit-2"
+                    }, {
+                      "$ref" : "#/$defs/AddExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/SubExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/MulExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/DivExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/RatioExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/PctExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/YearOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/QuarterOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/MonthOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/IsoWeekOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/DayOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/IsoDayOfWeekExpr"
+                    }, {
+                      "$ref" : "#/$defs/BucketExpr"
+                    }, {
+                      "$ref" : "#/$defs/CoalesceExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/CaseExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/SumAllExpr"
+                    }, {
+                      "$ref" : "#/$defs/ConcatExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/TrimExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/UpperExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/LowerExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/SplitPartExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/ToTextExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/ParamRef-2"
+                    } ]
+                  },
+                  "position" : {
+                    "anyOf" : [ {
+                      "$ref" : "#/$defs/First"
+                    }, {
+                      "$ref" : "#/$defs/Last"
+                    }, {
+                      "$ref" : "#/$defs/After"
+                    } ]
+                  },
+                  "op" : {
+                    "const" : "addColumn"
+                  }
+                },
+                "required" : [ "as", "expr", "position", "op" ],
+                "title" : "AddColumn"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "col" : {
+                    "type" : "string"
+                  },
+                  "expr" : {
+                    "anyOf" : [ {
+                      "$ref" : "#/$defs/ColRef-2"
+                    }, {
+                      "$ref" : "#/$defs/Lit-2"
+                    }, {
+                      "$ref" : "#/$defs/AddExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/SubExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/MulExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/DivExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/RatioExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/PctExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/YearOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/QuarterOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/MonthOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/IsoWeekOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/DayOfExpr"
+                    }, {
+                      "$ref" : "#/$defs/IsoDayOfWeekExpr"
+                    }, {
+                      "$ref" : "#/$defs/BucketExpr"
+                    }, {
+                      "$ref" : "#/$defs/CoalesceExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/CaseExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/SumAllExpr"
+                    }, {
+                      "$ref" : "#/$defs/ConcatExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/TrimExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/UpperExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/LowerExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/SplitPartExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/ToTextExpr-2"
+                    }, {
+                      "$ref" : "#/$defs/ParamRef-2"
+                    } ]
                   },
                   "where" : {
                     "anyOf" : [ {
@@ -1453,142 +2667,120 @@
                     }, {
                       "$ref" : "#/$defs/NotPredicate-2"
                     } ]
+                  },
+                  "op" : {
+                    "const" : "setColumn"
                   }
                 },
-                "required" : [ "as", "fn", "of" ],
-                "title" : "AggregateMeasure"
-              }
-            },
-            "op" : {
-              "const" : "aggregate"
-            }
-          },
-          "required" : [ "groupBy", "measures", "op" ],
-          "title" : "AggregateStep"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "by" : {
-              "type" : "array",
-              "items" : {
+                "required" : [ "col", "expr", "op" ],
+                "title" : "SetColumn"
+              }, {
                 "type" : "object",
                 "properties" : {
                   "col" : {
                     "type" : "string"
                   },
-                  "dir" : {
-                    "type" : "string"
+                  "op" : {
+                    "const" : "dropColumn"
                   }
                 },
-                "required" : [ "col", "dir" ],
-                "title" : "SortKey"
-              }
-            },
-            "op" : {
-              "const" : "sort"
-            }
-          },
-          "required" : [ "by", "op" ],
-          "title" : "SortStep"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "n" : {
-              "type" : "integer"
-            },
-            "op" : {
-              "const" : "limit"
-            }
-          },
-          "required" : [ "n", "op" ],
-          "title" : "LimitStep"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "kind" : {
-              "type" : "string",
-              "enum" : [ "inner", "left" ],
-              "title" : "JoinKind"
-            },
-            "on" : {
-              "type" : "object",
-              "properties" : {
-                "left" : {
-                  "type" : "string"
+                "required" : [ "col", "op" ],
+                "title" : "DropColumn"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "col" : {
+                    "type" : "string"
+                  },
+                  "to" : {
+                    "type" : "string"
+                  },
+                  "op" : {
+                    "const" : "renameColumn"
+                  }
                 },
-                "right" : {
-                  "type" : "string"
-                }
-              },
-              "required" : [ "left", "right" ],
-              "title" : "JoinKey"
-            },
-            "with" : {
-              "type" : "string"
-            },
-            "op" : {
-              "const" : "join"
+                "required" : [ "col", "to", "op" ],
+                "title" : "RenameColumn"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "col" : {
+                    "type" : "string"
+                  },
+                  "position" : {
+                    "anyOf" : [ {
+                      "$ref" : "#/$defs/First"
+                    }, {
+                      "$ref" : "#/$defs/Last"
+                    }, {
+                      "$ref" : "#/$defs/After"
+                    } ]
+                  },
+                  "op" : {
+                    "const" : "moveColumn"
+                  }
+                },
+                "required" : [ "col", "position", "op" ],
+                "title" : "MoveColumn"
+              }, {
+                "type" : "object",
+                "properties" : {
+                  "where" : {
+                    "anyOf" : [ {
+                      "$ref" : "#/$defs/EqPredicate"
+                    }, {
+                      "$ref" : "#/$defs/NePredicate"
+                    }, {
+                      "$ref" : "#/$defs/LtPredicate"
+                    }, {
+                      "$ref" : "#/$defs/LtePredicate"
+                    }, {
+                      "$ref" : "#/$defs/GtPredicate"
+                    }, {
+                      "$ref" : "#/$defs/GtePredicate"
+                    }, {
+                      "$ref" : "#/$defs/InPredicate"
+                    }, {
+                      "$ref" : "#/$defs/NotInPredicate"
+                    }, {
+                      "$ref" : "#/$defs/IsNullPredicate"
+                    }, {
+                      "$ref" : "#/$defs/IsNotNullPredicate"
+                    }, {
+                      "$ref" : "#/$defs/AndPredicate-2"
+                    }, {
+                      "$ref" : "#/$defs/OrPredicate-2"
+                    }, {
+                      "$ref" : "#/$defs/NotPredicate-2"
+                    } ]
+                  },
+                  "op" : {
+                    "const" : "dropRows"
+                  }
+                },
+                "required" : [ "where", "op" ],
+                "title" : "DropRows"
+              } ]
             }
           },
-          "required" : [ "kind", "on", "with", "op" ],
-          "title" : "JoinStep"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "cols" : {
-              "type" : "string"
-            },
-            "rows" : {
-              "type" : "array",
-              "items" : {
-                "type" : "string"
-              }
-            },
-            "values" : {
-              "type" : "string"
-            },
-            "op" : {
-              "const" : "pivot"
+          "params" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/$defs/ParamDecl"
             }
           },
-          "required" : [ "cols", "rows", "values", "op" ],
-          "title" : "PivotStep"
-        }, {
-          "type" : "object",
-          "properties" : {
-            "current" : {
-              "type" : "string"
-            },
-            "grain" : {
-              "type" : "string",
-              "enum" : [ "day", "week", "month", "quarter", "year" ],
-              "title" : "Grain"
-            },
-            "groupBy" : {
-              "type" : "array",
-              "items" : {
-                "type" : "string"
-              }
-            },
-            "metric" : {
-              "type" : "string"
-            },
-            "prior" : {
-              "type" : "string"
-            },
-            "timeDim" : {
-              "type" : "string"
-            },
-            "op" : {
-              "const" : "periodCompare"
-            }
+          "target" : {
+            "type" : "string"
           },
-          "required" : [ "current", "grain", "metric", "prior", "timeDim", "op" ],
-          "title" : "PeriodCompareStep"
-        } ]
-      }
+          "kind" : {
+            "const" : "edit"
+          }
+        },
+        "required" : [ "bindings", "ops", "params", "target", "kind" ],
+        "title" : "EditPlan"
+      } ]
     }
   },
-  "required" : [ "meta", "sink", "source", "steps" ],
-  "title" : "Plan"
+  "required" : [ "irVersion", "plan" ],
+  "title" : "PlanEnvelope"
 }

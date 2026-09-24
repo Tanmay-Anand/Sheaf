@@ -145,7 +145,11 @@ export default function WorkbookView() {
     setBusy("Reading the workbook…");
     setError(null);
     try {
-      const result = await scanWorkbook({ exemplars, corrections: catalogRef.current?.corrections ?? [] });
+      const result = await scanWorkbook({
+        exemplars,
+        corrections: catalogRef.current?.corrections ?? [],
+        previous: catalogRef.current,
+      });
       setSnapshot(result.snapshot);
       setStale({ entities: new Set(), outside: false });
       await commit(result.catalog);
@@ -183,7 +187,7 @@ export default function WorkbookView() {
         { sheet: entity.sheet, entity: entity.name, column: column.name, kind },
       ];
       if (snapshot) {
-        await commit(buildCatalog(snapshot, { exemplars, corrections }));
+        await commit(buildCatalog(snapshot, { exemplars, corrections, previous: catalog }));
         return;
       }
       // Loaded from the workbook without a fresh read: rescan so the correction is applied to real data.

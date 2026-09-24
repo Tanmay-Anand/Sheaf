@@ -8,6 +8,8 @@ import type { DependentKind } from "@sheaf/contract/catalog";
 export type CellValue = string | number | boolean | null;
 
 export interface SheetSnapshot {
+  /** Excel's worksheet id: survives renames, so plans and entities reference sheets by it. */
+  id: string;
   name: string;
   /** 1-based sheet row of values[0]. */
   originRow: number;
@@ -20,6 +22,8 @@ export interface SheetSnapshot {
 }
 
 export interface TableSnapshot {
+  /** Excel's table id: survives renames and moves. */
+  id: string;
   name: string;
   sheet: string;
   /** Full table address including header and totals rows, e.g. "Sales!A1:H200". */
@@ -27,6 +31,8 @@ export interface TableSnapshot {
   showHeaders: boolean;
   showTotals: boolean;
   columns: string[];
+  /** Excel's table column ids, in column order; they survive header renames. */
+  columnIds?: string[];
 }
 
 export interface NamedItemSnapshot {
@@ -59,10 +65,22 @@ export interface ValidationSnapshot {
   listSource?: string;
 }
 
+/**
+ * A date cell as Excel stores it (the serial number) and as it displays it. Office.js can't read
+ * the workbook's date system (Workbook.use1904DateSystem is preview-only), so it is inferred by
+ * checking which system turns the serial into the displayed date.
+ */
+export interface DateProbe {
+  serial: number;
+  text: string;
+  numberFormat: string;
+}
+
 export interface WorkbookSnapshot {
   sheets: SheetSnapshot[];
   tables: TableSnapshot[];
   names: NamedItemSnapshot[];
   sources: ReferenceSource[];
   validations: ValidationSnapshot[];
+  dateProbes?: DateProbe[];
 }

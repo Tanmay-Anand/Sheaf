@@ -1,0 +1,95 @@
+{
+  "question": "monthly revenue in 2025",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "month: number",
+      "revenue: currency:INR"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "and",
+          "clauses": [
+            {
+              "op": "ne",
+              "left": {
+                "type": "col",
+                "col": "status"
+              },
+              "right": {
+                "type": "lit",
+                "value": "returned"
+              }
+            },
+            {
+              "op": "gte",
+              "left": {
+                "type": "col",
+                "col": "order_date"
+              },
+              "right": {
+                "type": "lit",
+                "value": "2025-01-01",
+                "valueType": "date"
+              }
+            },
+            {
+              "op": "lt",
+              "left": {
+                "type": "col",
+                "col": "order_date"
+              },
+              "right": {
+                "type": "lit",
+                "value": "2026-01-01",
+                "valueType": "date"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "op": "derive",
+        "as": "month",
+        "expr": {
+          "type": "monthOf",
+          "col": "order_date"
+        }
+      },
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "month"
+        ],
+        "measures": [
+          {
+            "fn": "sum",
+            "of": "amount",
+            "as": "revenue"
+          }
+        ]
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "month",
+            "dir": "asc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

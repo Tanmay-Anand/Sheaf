@@ -32,8 +32,8 @@ Sheaf/
 ├── corpus/          # Six CSV fixtures + questions.md — M-0 design corpus
 ├── docs/            # ir-spec.md, diagnostics.md
 ├── contract/        # Generated artefacts (committed snapshot)
-│   ├── schema/      #   plan.schema.json  — written by Maven
-│   └── types/       #   plan.d.ts, catalog.d.ts — written by npm
+│   ├── schema/      #   plan, unbound-plan, planner-response, commit-request, catalog (.schema.json) — written by Maven
+│   └── types/       #   the matching .d.ts files — written by npm
 ├── service/         # Spring Boot 3.3 / Java 21 backend
 └── addin/           # React 18 / Fluent UI v9 Office Add-in
 ```
@@ -49,14 +49,14 @@ cd service
 mvn --batch-mode verify
 ```
 
-This compiles the Java IR and catalog types, runs the tests (ArchUnit layering rules, MockMvc endpoint tests, catalog policy tests), and generates `contract/schema/plan.schema.json` and `contract/schema/catalog.schema.json` at the `prepare-package` phase.
+This compiles the Java IR and catalog types, runs the tests (ArchUnit layering rules, MockMvc endpoint tests, the type checker's golden tests over `corpus/plans/`, 67 invalid plans, binder and consent tests, and jqwik property tests), and generates the five contract schemas in `contract/schema/` at the `prepare-package` phase.
 
 Every record component is `required` in the generated schema unless it is annotated `@Nullable` (`com.sheaf.domain.common.Nullable`). That is what makes the generated TypeScript types strict.
 
 **Expected output (abbreviated):**
 
 ```
-[INFO] Tests run: 13, Failures: 0, Errors: 0
+[INFO] Tests run: 117, Failures: 0, Errors: 0
 [INFO] BUILD SUCCESS
 ```
 

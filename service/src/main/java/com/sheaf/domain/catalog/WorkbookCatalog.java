@@ -10,15 +10,19 @@ import java.util.List;
  * <p>Built client-side by the profiler, persisted inside the workbook, and sent to the service
  * for prompt assembly. It carries schema and statistics only, never rows. Exemplars (at most
  * five short values per column) are the single exception and can be switched off.
+ *
+ * @param dateSystem Whether date serials count from 1900 or 1904 (inferred: Excel's own flag is a
+ *                   preview-only API), or unknown when the workbook has no date cells to infer from.
  */
 public record WorkbookCatalog(
         int version,
         Instant generatedAt,
+        DateSystem dateSystem,
         List<CatalogEntity> entities,
         List<JoinCandidate> joinCandidates,
         List<UntraceableReference> untraceable,
         List<CatalogCorrection> corrections,
         List<String> warnings
 ) {
-    public static final int CURRENT_VERSION = 1;
+    public static final int CURRENT_VERSION = 2;
 }

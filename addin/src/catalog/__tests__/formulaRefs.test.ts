@@ -34,8 +34,8 @@ describe("extractReferences", () => {
     const refs = extractReferences("=SUM(Sales[Amount])+Sales[[#This Row],[Qty]]*[@Price]+SUM(Sales[[Jan]:[Mar]])+COUNTA(Sales[#All])").refs;
     expect(refs.filter((r) => r.kind === "structured")).toEqual([
       { kind: "structured", table: "Sales", columns: ["Amount"] },
-      { kind: "structured", table: "Sales", columns: ["Qty"] },
-      { kind: "structured", table: null, columns: ["Price"] },
+      { kind: "structured", table: "Sales", columns: ["Qty"], thisRow: true },
+      { kind: "structured", table: null, columns: ["Price"], thisRow: true },
       { kind: "structured", table: "Sales", columns: ["Jan", "Mar"], span: ["Jan", "Mar"] },
       { kind: "structured", table: "Sales", columns: "all" },
     ]);
