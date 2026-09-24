@@ -1,13 +1,16 @@
 export type ScalarKind =
   "number" | "currency" | "percent" | "date" | "datetime" | "string" | "boolean" | "categorical" | "empty";
+export type DateSystem = "1900" | "1904" | "unknown";
 export type DependentKind =
   "formula" | "namedRange" | "dataValidation" | "conditionalFormat" | "chartSeries" | "pivotTable";
+export type DependentClass = "exclusive" | "spanning" | "wholeColumn" | "wholeRow";
 export type EntityKind = "table" | "region";
 export type SkipReason = "blank" | "sectionLabel" | "totals" | "title";
 export type UntraceableKind = "indirect" | "offset" | "externalLink" | "unparsed";
 
 export interface WorkbookCatalog {
   corrections: CatalogCorrection[];
+  dateSystem: DateSystem;
   entities: CatalogEntity[];
   generatedAt: string;
   joinCandidates: JoinCandidate[];
@@ -33,10 +36,12 @@ export interface CatalogEntity {
   firstDataRow: number;
   headerRow: number;
   headerRows: number;
+  id: string;
   kind: EntityKind;
   lastDataRow: number;
   name: string;
   sheet: string;
+  sheetId: string;
   skippedRows: SkippedRow[];
   tableName?: string;
   [k: string]: unknown;
@@ -47,14 +52,17 @@ export interface CatalogColumn {
   distinctCount: number;
   exemplars?: string[];
   formula: boolean;
+  id: string;
   index: number;
   keyCandidate: boolean;
   kind: ScalarKind;
   letter: string;
+  mayContainErrors: boolean;
   name: string;
   nullRate: number;
   nullable: boolean;
   numberFormat?: string;
+  numbersStoredAsText: boolean;
   percentScale?: number;
   unit?: string;
   validationList?: string[];
@@ -63,8 +71,10 @@ export interface CatalogColumn {
 }
 export interface ColumnDependent {
   detail: string;
+  fixedRows: boolean;
   kind: DependentKind;
   location: string;
+  refClass: DependentClass;
   [k: string]: unknown;
 }
 export interface SkippedRow {

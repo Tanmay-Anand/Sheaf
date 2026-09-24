@@ -1,0 +1,107 @@
+package com.sheaf.domain.validation;
+
+/**
+ * Every way a plan can fail to parse, bind, type-check or be committed (docs/diagnostics.md).
+ * {@code E_} codes stop the plan; {@code W_} codes are reported and the plan stays valid.
+ */
+public enum DiagnosticCode {
+    // Parse: the JSON doesn't match the contract.
+    E_PARSE_INVALID_JSON,
+    E_PARSE_UNKNOWN_VARIANT,
+    E_PARSE_UNKNOWN_FIELD,
+    E_PARSE_MISSING_FIELD,
+    E_PARSE_INVALID_VALUE,
+
+    // Plan-level and sinks
+    E_UNKNOWN_SOURCE,
+    E_SINK_NEW_SHEET_NAME_MISSING,
+    E_SINK_SHEET_NAME_INVALID,
+    E_SINK_SHEET_NAME_TAKEN,
+    E_SINK_ANCHOR_INVALID,
+    E_EMPTY_PIPELINE_WRITE,
+
+    // Columns
+    E_UNKNOWN_COLUMN,
+    E_COLUMN_NOT_IN_OUTPUT,
+    E_DERIVE_COLUMN_COLLISION,
+    E_DUPLICATE_OUTPUT_COLUMN,
+
+    // Types and arguments
+    E_TYPE_MISMATCH,
+    E_TYPE_INCOMPARABLE,
+    E_CURRENCY_UNIT_MISMATCH,
+    E_ORDER_COMPARISON_NON_ORDERED,
+    E_INVALID_ARGUMENT,
+    E_TOTEXT_OUTSIDE_CONCAT,
+    E_UNKNOWN_PARAM,
+
+    // Dates and periods
+    E_DATE_EXTRACT_NON_DATE,
+    E_UNKNOWN_METRIC,
+    E_PERIOD_COMPARE_NO_TIME_DIM,
+    E_PERIOD_COMPARE_UNSUPPORTED_GRAIN,
+    E_PERIOD_COMPARE_INVALID_PERIOD,
+    E_PERIOD_COMPARE_PLACEMENT,
+
+    // Joins and lookups
+    E_UNAPPROVED_JOIN,
+    E_JOIN_KEY_TYPE_MISMATCH,
+    E_JOIN_ENTITY_UNKNOWN,
+    E_LOOKUP_KEY_NOT_UNIQUE,
+
+    // Pivot
+    E_PIVOT_VALUE_NOT_NUMERIC,
+    E_PIVOT_NON_CATEGORICAL_COLS,
+    E_PIVOT_HIGH_CARDINALITY,
+    E_PIVOT_NOT_TERMINAL,
+
+    // Derive / expressions
+    E_SUMALL_INVALID_PLACEMENT,
+    E_SUMALL_UNKNOWN_COLUMN,
+    E_BUCKET_BREAK_COUNT,
+    E_CASE_NO_ELSE,
+
+    // Sort / aggregate / limit
+    E_SORT_CATEGORICAL_UNORDERED,
+    E_AGGREGATE_GROUPBY_UNKNOWN,
+    E_COUNTIF_NO_PREDICATE,
+    E_LIMIT_NOT_POSITIVE,
+
+    // Edit plans
+    E_EDIT_EMPTY,
+    E_EDIT_UNKNOWN_COLUMN,
+    E_EDIT_COLUMN_COLLISION,
+    E_RENAME_COLLISION,
+    E_EDIT_DROPS_EVERY_COLUMN,
+
+    // Template sink
+    E_TEMPLATE_UNKNOWN,
+    E_TEMPLATE_COLUMN_MISSING,
+    E_TEMPLATE_EXTRA_COLUMN,
+    E_TEMPLATE_COLUMN_ORDER,
+    E_TEMPLATE_TYPE_INCOMPATIBLE,
+    E_TEMPLATE_VALUE_NOT_IN_LIST,
+    E_TEMPLATE_DYNAMIC_COLUMNS,
+
+    // Commit: the user's request doesn't satisfy what the plan needs.
+    E_COMMIT_PLAN_MISMATCH,
+    E_SINK_ANCHOR_MISSING,
+    E_DROP_HAS_DEPENDENTS,
+    E_PARAM_MISSING,
+    E_PARAM_TYPE,
+
+    // Warnings
+    W_LIMIT_WITHOUT_SORT,
+    W_TRIVIAL_PLAN,
+    W_CATEGORICAL_LITERAL_NOT_IN_DOMAIN,
+    W_OVERWRITES_FORMULAS,
+    W_UNMAPPED_TEMPLATE_COLUMN,
+    W_UNTRACEABLE_REFERENCES,
+    W_DEPENDENTS_NEED_CONSENT,
+    W_MAY_CONTAIN_ERRORS,
+    W_NUMBERS_STORED_AS_TEXT;
+
+    public boolean isError() {
+        return name().startsWith("E_");
+    }
+}

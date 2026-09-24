@@ -1,0 +1,91 @@
+{
+  "question": "overdue tasks by project, sorted by priority",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "project_id: categorical",
+      "project_name: categorical",
+      "task_id: string",
+      "task: string",
+      "assignee: categorical",
+      "start_date: date",
+      "end_date: date",
+      "status: categorical",
+      "priority: categorical",
+      "effort_hours: number",
+      "completion_pct: percent"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Tasks",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "or",
+          "clauses": [
+            {
+              "op": "eq",
+              "left": {
+                "type": "col",
+                "col": "status"
+              },
+              "right": {
+                "type": "lit",
+                "value": "overdue"
+              }
+            },
+            {
+              "op": "and",
+              "clauses": [
+                {
+                  "op": "ne",
+                  "left": {
+                    "type": "col",
+                    "col": "status"
+                  },
+                  "right": {
+                    "type": "lit",
+                    "value": "completed"
+                  }
+                },
+                {
+                  "op": "lt",
+                  "left": {
+                    "type": "col",
+                    "col": "end_date"
+                  },
+                  "right": {
+                    "type": "lit",
+                    "value": "2025-03-28",
+                    "valueType": "date"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "project_name",
+            "dir": "asc"
+          },
+          {
+            "col": "priority",
+            "dir": "asc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

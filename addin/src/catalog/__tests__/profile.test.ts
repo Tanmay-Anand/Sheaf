@@ -6,7 +6,7 @@ describe("profileColumn: dates as Excel stores them after a paste", () => {
   // rest as text, which is what happened with the corpus's ugly sheet in desktop Excel.
   const cells = [45663, "Jan 13 2025", 45677, 45677, "01/15/2025", "February 3 2025", 45698, "2025-Mar-08"];
   const formats = ["m/d/yyyy", "General", "m/d/yyyy", "d-mmm-yy", "General", "General", "m/d/yyyy", "General"];
-  const { column } = profileColumn({ name: "Date", letter: "C", index: 2, cells, formats }, { exemplars: false });
+  const { column } = profileColumn({ id: "c", name: "Date", letter: "C", index: 2, cells, formats }, { exemplars: false });
 
   it("groups real Excel dates as one kind, whatever their display format", () => {
     expect(column.kind).toBe("date");
@@ -22,7 +22,7 @@ describe("profileColumn: dates as Excel stores them after a paste", () => {
 
   it("raises no text-date warning when every date is a real Excel date", () => {
     const clean = profileColumn(
-      { name: "Date", letter: "C", index: 2, cells: [45663, 45677], formats: ["m/d/yyyy", "d-mmm-yy"] },
+      { id: "c", name: "Date", letter: "C", index: 2, cells: [45663, 45677], formats: ["m/d/yyyy", "d-mmm-yy"] },
       { exemplars: false },
     ).column;
     expect(clean.dateFormats).toEqual(["Excel date"]);

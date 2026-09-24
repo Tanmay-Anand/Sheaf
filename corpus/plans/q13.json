@@ -1,0 +1,61 @@
+{
+  "question": "effort hours by assignee, for incomplete tasks",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "assignee: categorical",
+      "remaining_hours: number"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Tasks",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "not",
+          "clause": {
+            "op": "eq",
+            "left": {
+              "type": "col",
+              "col": "status"
+            },
+            "right": {
+              "type": "lit",
+              "value": "completed"
+            }
+          }
+        }
+      },
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "assignee"
+        ],
+        "measures": [
+          {
+            "fn": "sum",
+            "of": "effort_hours",
+            "as": "remaining_hours"
+          }
+        ]
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "remaining_hours",
+            "dir": "desc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

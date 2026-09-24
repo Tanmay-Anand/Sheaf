@@ -1,0 +1,73 @@
+{
+  "question": "fill the CRM template that uses its own column names",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "Given Name: string",
+      "Surname: string",
+      "E-mail Address: string",
+      "Organisation: string?",
+      "Phone Number: string",
+      "Joined On: date"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Contacts",
+    "steps": [
+      {
+        "op": "project",
+        "columns": [
+          {
+            "as": "Given Name",
+            "expr": {
+              "type": "col",
+              "col": "first_name"
+            }
+          },
+          {
+            "as": "Surname",
+            "expr": {
+              "type": "col",
+              "col": "last_name"
+            }
+          },
+          {
+            "as": "E-mail Address",
+            "expr": {
+              "type": "col",
+              "col": "email"
+            }
+          },
+          {
+            "as": "Organisation",
+            "expr": {
+              "type": "col",
+              "col": "company"
+            }
+          },
+          {
+            "as": "Phone Number",
+            "expr": {
+              "type": "col",
+              "col": "phone"
+            }
+          },
+          {
+            "as": "Joined On",
+            "expr": {
+              "type": "col",
+              "col": "signup_date"
+            }
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "template",
+      "templateId": "crm-synonyms"
+    },
+    "params": []
+  }
+}

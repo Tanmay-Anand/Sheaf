@@ -1,0 +1,77 @@
+{
+  "question": "return rate by product category",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "product_category: categorical",
+      "total_orders: number",
+      "returned_orders: number",
+      "return_rate: percent"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "product_category"
+        ],
+        "measures": [
+          {
+            "fn": "count",
+            "of": "*",
+            "as": "total_orders"
+          },
+          {
+            "fn": "countIf",
+            "of": "*",
+            "as": "returned_orders",
+            "where": {
+              "op": "eq",
+              "left": {
+                "type": "col",
+                "col": "status"
+              },
+              "right": {
+                "type": "lit",
+                "value": "returned"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "op": "derive",
+        "as": "return_rate",
+        "expr": {
+          "type": "pct",
+          "numerator": {
+            "type": "col",
+            "col": "returned_orders"
+          },
+          "denominator": {
+            "type": "col",
+            "col": "total_orders"
+          }
+        }
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "return_rate",
+            "dir": "desc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

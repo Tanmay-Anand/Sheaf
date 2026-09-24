@@ -1,0 +1,17 @@
+contact_id,first_name,last_name,email,phone,company,street,city,postcode,region,signup_date,status,fax,lifetime_value
+C-001,Aarav,Mehta,aarav.mehta@brightloop.in,98200 11234,BrightLoop Labs,14 Hill Road,Mumbai,400050,West,2024-02-11,active,,184500
+C-002,Diya,Kapoor,diya.k@northwind.co,98110 22345,Northwind Traders,22 Park Street,Kolkata,700016,East,2024-03-02,active,033-2229-1100,96200
+C-003,Kabir,Singh,kabir.singh@gmail.com,99100 33456,,7 Lodhi Estate,Delhi,110003,North,2024-04-19,lead,,0
+C-004,Isha,Rao,isha@tealwave.io,98450 44567,Tealwave,,Bangalore,560001,South,2024-05-06,active,,241000
+C-005,Vivaan,Joshi,vivaan.joshi@outlook.com,98230 55678,Joshi & Sons,18 FC Road,Pune,411004,West,2024-06-23,churned,020-2553-7788,58800
+C-006,Anaya,Iyer,anaya.iyer@quantico.in,94440 66789,Quantico Systems,3 Anna Salai,Chennai,600002,South,2024-07-14,active,,132750
+C-007,Reyansh,Das,reyansh@brahmaputra.net,94350 77890,Brahmaputra Tea,9 GS Road,Guwahati,781005,NE,2024-08-01,lead,,0
+C-008,Myra,Nair,myra.nair@gmail.com,98470 88901,,,Kochi,,South,2024-08-28,lead,,0
+C-009,Arjun,Verma,arjun.verma@cedarline.com,99870 99012,Cedarline Logistics,41 Civil Lines,Nagpur,440001,Central,2024-09-15,active,0712-256-4400,305900
+C-010,Sara,Khan,sara.khan@lumen.studio,98330 10123,Lumen Studio,5 Bandra Reclamation,Mumbai,400050,West,2024-10-04,churned,,41300
+C-011,Test,User,test.user@example.com,90000 00000,Sheaf QA,1 Test Street,Mumbai,400001,West,2024-10-20,test,,0
+C-012,Ira,Banerjee,ira.b@riverside.org,98300 12345,Riverside Trust,12 Salt Lake,Kolkata,700091,East,2024-11-09,active,,77600
+C-013,Dev,Malhotra,dev@malhotra.co.in,98150 23456,Malhotra Exports,6 Mall Road,Delhi,110054,North,2024-12-01,active,011-2391-5566,215400
+C-014,Demo,Account,demo@example.com,90000 00001,Sheaf QA,1 Test Street,Mumbai,400001,West,2025-01-05,test,,0
+C-015,Kiara,Pillai,kiara.pillai@verdant.in,98950 34567,Verdant Farms,,Kochi,682001,South,2025-01-22,lead,,0
+C-016,Rohan,Chawla,rohan.chawla@gmail.com,98180 45678,,21 Sector 17,Chandigarh,160017,North,2025-02-10,active,,64900

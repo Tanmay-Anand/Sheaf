@@ -13,7 +13,7 @@ import {
 import { fetchPlan } from "../../api/planClient";
 import PlanDisplay from "./PlanDisplay";
 import WorkbookView from "./WorkbookView";
-import type { Plan } from "../../api/planClient";
+import type { PlanRecord } from "../../api/planClient";
 
 const useStyles = makeStyles({
   root: {
@@ -43,7 +43,7 @@ type TabId = "ask" | "workbook";
 function AskView() {
   const styles = useStyles();
   const [question, setQuestion] = useState("");
-  const [plan, setPlan] = useState<Plan | null>(null);
+  const [plan, setPlan] = useState<PlanRecord | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,7 +84,7 @@ function AskView() {
       </div>
 
       {error && <div className={styles.error}>{error}</div>}
-      {plan && <PlanDisplay plan={plan} />}
+      {plan && <PlanDisplay record={plan} />}
     </>
   );
 }

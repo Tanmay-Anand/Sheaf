@@ -6,8 +6,10 @@ import type {
   WorkbookCatalog,
 } from "@sheaf/contract/catalog";
 import { type Box, boxAddress, colToLetters, parseAddress, sameSheet } from "./a1";
+import { inferDateSystem } from "./dateSystem";
 import { columnKey, type EntityLayout, MAX_DEPENDENTS_PER_COLUMN, resolveDependents } from "./dependencies";
 import { cyrb53 } from "./hash";
+import { columnIds, regionIds, renamedColumns, tableEntityId } from "./ids";
 import { inferJoins, type JoinColumn } from "./joins";
 import { profileColumn } from "./profile";
 import { detectRegions } from "./regions";
@@ -21,17 +23,20 @@ export interface BuildOptions {
    */
   exemplars: boolean;
   corrections?: CatalogCorrection[];
+  /** The last catalog of this workbook, so regions that moved or grew keep their ids. */
+  previous?: WorkbookCatalog | null;
   now?: Date;
 }
 
-export const CATALOG_VERSION = 1;
+export const CATALOG_VERSION = 2;
 const MAX_VALIDATION_VALUES = 200;
 
 // Pick, not Omit: the generated interfaces carry an index signature, and Omit over it erases
 // every named key.
 type EntityHead = Pick<
   CatalogEntity,
-  "name" | "kind" | "sheet" | "address" | "headerRow" | "headerRows" | "firstDataRow" | "lastDataRow" | "dataRowCount" | "skippedRows"
+  | "id" | "name" | "kind" | "sheetId" | "sheet" | "address" | "headerRow" | "headerRows" | "firstDataRow" | "lastDataRow"
+  | "dataRowCount" | "skippedRows"
 > & { tableName?: string };
 
 interface Draft {
@@ -39,6 +44,7 @@ interface Draft {
   box: Box;
   sheet: SheetSnapshot;
   headers: string[];
+  columnIds: string[];
   dataRows: number[];
 }
 
@@ -106,8 +112,10 @@ export function buildCatalog(wb: WorkbookSnapshot, opts: BuildOptions): Workbook
       : Array.from({ length: box.right - box.left + 1 }, (_, i) => t.columns[i] ?? `Column ${colToLetters(box.left + i)}`);
     drafts.push({
       entity: {
+        id: tableEntityId(t.id),
         name: uniqueName(t.name, taken),
         kind: "table",
+        sheetId: sheet.id,
         sheet: sheet.name,
         address: boxAddress(sheet.name, box),
         headerRow,
@@ -121,6 +129,7 @@ export function buildCatalog(wb: WorkbookSnapshot, opts: BuildOptions): Workbook
       box,
       sheet,
       headers,
+      columnIds: columnIds(headers, t.columnIds?.length === headers.length ? t.columnIds : undefined),
       dataRows,
     });
   }
@@ -138,14 +147,20 @@ export function buildCatalog(wb: WorkbookSnapshot, opts: BuildOptions): Workbook
     if (regions.length === 0 && !masked.has(sheet.name) && sheet.values.some((r) => r.some((v) => !isBlank(v)))) {
       warnings.push(`Sheet "${sheet.name}" has content but no table Sheaf can read.`);
     }
+    const ids = regionIds(
+      regions.map((reg) => ({ sheetId: sheet.id, headerRow: reg.headerRow, left: reg.box.left, headers: reg.headers })),
+      opts.previous?.entities,
+    );
     regions.forEach((reg, i) => {
       const name = uniqueName(i === 0 ? sheet.name : `${sheet.name} ${i + 1}`, taken);
       if (reg.dataRows.length === 0) warnings.push(`${name} has a header but no data rows.`);
       warnings.push(...reg.warnings.map((w) => `${name}: ${w}`));
       drafts.push({
         entity: {
+          id: ids[i]!,
           name,
           kind: "region",
+          sheetId: sheet.id,
           sheet: sheet.name,
           address: boxAddress(sheet.name, reg.box),
           headerRow: reg.headerRow,
@@ -158,6 +173,7 @@ export function buildCatalog(wb: WorkbookSnapshot, opts: BuildOptions): Workbook
         box: reg.box,
         sheet,
         headers: reg.headers,
+        columnIds: columnIds(reg.headers),
         dataRows: reg.dataRows,
       });
     });
@@ -170,6 +186,7 @@ export function buildCatalog(wb: WorkbookSnapshot, opts: BuildOptions): Workbook
       const col = d.box.left + i;
       const p = profileColumn(
         {
+          id: d.columnIds[i]!,
           name: header,
           letter: colToLetters(col),
           index: i,
@@ -218,6 +235,7 @@ export function buildCatalog(wb: WorkbookSnapshot, opts: BuildOptions): Workbook
     name: draft.entity.name,
     sheet: draft.entity.sheet,
     box: draft.box,
+    dataTop: draft.entity.firstDataRow,
     ...(draft.entity.tableName !== undefined ? { tableName: draft.entity.tableName } : {}),
     columns: columns.map((c, i) => ({ name: c.name, col: draft.box.left + i })),
   }));
@@ -268,6 +286,15 @@ export function buildCatalog(wb: WorkbookSnapshot, opts: BuildOptions): Workbook
     contentHash: hashBox(draft.sheet, draft.box),
   }));
 
+  // Carried-over entities whose headers changed: plans that named the old header must confirm.
+  for (const e of entities) {
+    const before = opts.previous?.entities.find((p) => p.id === e.id);
+    if (!before) continue;
+    for (const r of renamedColumns(before, e)) {
+      warnings.push(`${e.name}: column "${r.from}" is now "${r.to}"; saved plans that used "${r.from}" will ask before running.`);
+    }
+  }
+
   if (deps.untraceable.length > 0) {
     warnings.push(
       `${deps.untraceable.length} reference${deps.untraceable.length === 1 ? "" : "s"} can't be traced (INDIRECT, OFFSET or links to other workbooks); dependency checks can't be complete.`,
@@ -277,6 +304,7 @@ export function buildCatalog(wb: WorkbookSnapshot, opts: BuildOptions): Workbook
   return {
     version: CATALOG_VERSION,
     generatedAt: (opts.now ?? new Date()).toISOString(),
+    dateSystem: inferDateSystem(wb.dateProbes ?? []),
     entities,
     joinCandidates: inferJoins(joinColumns),
     untraceable: deps.untraceable,

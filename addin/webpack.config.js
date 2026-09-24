@@ -22,6 +22,9 @@ module.exports = async (env, options) => {
       alias: {
         "@sheaf/contract$": path.resolve(__dirname, "../contract/types/plan.d.ts"),
         "@sheaf/contract/catalog$": path.resolve(__dirname, "../contract/types/catalog.d.ts"),
+        "@sheaf/contract/unbound$": path.resolve(__dirname, "../contract/types/unbound-plan.d.ts"),
+        "@sheaf/contract/response$": path.resolve(__dirname, "../contract/types/planner-response.d.ts"),
+        "@sheaf/contract/commit$": path.resolve(__dirname, "../contract/types/commit-request.d.ts"),
       },
     },
     module: {

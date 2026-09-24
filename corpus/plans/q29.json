@@ -1,0 +1,63 @@
+{
+  "question": "fill the CRM import template (same headers) from Contacts",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "first_name: string",
+      "last_name: string",
+      "email: string",
+      "company: string?"
+    ],
+    "sink": {
+      "mode": "template",
+      "templateId": "crm-exact",
+      "headerRow": 1,
+      "firstDataRow": 2
+    }
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Contacts",
+    "steps": [
+      {
+        "op": "project",
+        "columns": [
+          {
+            "as": "first_name",
+            "expr": {
+              "type": "col",
+              "col": "first_name"
+            }
+          },
+          {
+            "as": "last_name",
+            "expr": {
+              "type": "col",
+              "col": "last_name"
+            }
+          },
+          {
+            "as": "email",
+            "expr": {
+              "type": "col",
+              "col": "email"
+            }
+          },
+          {
+            "as": "company",
+            "expr": {
+              "type": "col",
+              "col": "company"
+            }
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "template",
+      "templateId": "crm-exact"
+    },
+    "params": []
+  }
+}

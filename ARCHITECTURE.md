@@ -147,10 +147,15 @@ Sheaf distinguishes two layers, and conflating them is the mistake most similar 
 ### 4.1 Shape
 
 ```
-Plan := { source, steps[], sink, meta }
+UnboundPlan  := { kind, source, steps[], sink intent, params[] }        -- what the model writes
+Plan         := { kind, source, steps[], sink, params[], bindings }     -- what the binder makes of it
+PlanEnvelope := { irVersion: "1.2", plan }                              -- what is hashed, stored and run
+CommitRequest:= { planHash, anchor?, onDependents, excludeErrorCells, params, regionHashes }   -- what the user decides
 ```
 
-`source` names an approved entity. `steps` is an ordered pipeline of operators. `sink` declares exactly where output goes. `meta` carries the plan hash, model identity, and prompt version.
+`source` names an entity; `steps` is an ordered pipeline of operators; the sink intent says where the model would like the result to go (`newSheet`, `anchor`, `template`). The **binder** resolves names to stable catalog ids and the intent to a concrete sink. The **plan hash** is SHA-256 over the RFC 8785 canonical JSON of the envelope; provenance (model, prompt version, time) sits outside it, so the same plan always has the same hash. Consent, anchor cells and parameter values arrive in the **commit request**, never in the plan: a model can't write them because its schema has no field for them (ir-spec §1).
+
+Since v1.1 this is a **query plan** (`kind: "query"`); an **edit plan** (`kind: "edit"`, §4.6) changes an entity in place. Plans travel in the tagged wire format generated from the Java records (ir-spec §8).
 
 ### 4.2 Operators (v1)
 
@@ -163,6 +168,7 @@ Plan := { source, steps[], sink, meta }
 | `join` | `Table × Table → Table` | Only along an **approved** join edge. |
 | `pivot` | `Table → Table` | Rows/cols/values. Column count is data-dependent — the one operator whose output width isn't static. |
 | `periodCompare` | `Table → Table` | First-class period-over-period. Not sugar. |
+| `project` *(v1.1)* | `Table → Table` | Select, rename, reorder and compute: the output is exactly the listed columns. Feeds template fill. |
 
 **`periodCompare` is deliberately an operator, not a derive.** Expressing period-over-period as derive-plus-self-join is technically possible and practically miserable — it has real semantics that deserve first-class treatment: partial-period handling, calendar-aligned vs. offset-aligned comparison, week-start convention, and what to do when the prior period has no matching member. Making it an operator means those decisions are made once, in code, not re-derived by a model every time.
 
@@ -212,9 +218,9 @@ The `hint` field exists for the model, not the user. Repair loop: max **two** at
 Two additions let Sheaf change a workbook, not only report on it.
 
 - **Workbook catalog.** The profiler covers every sheet, Excel Table and data region, and builds a **dependency map** of which formulas, named ranges, charts, PivotTables, validation rules and conditional formats reference each column. The catalog is stored in a custom XML part, and it holds schema and statistics, never rows. It is what the planner sees, and what impact analysis checks against.
-- **Edit plans** (`kind: "edit"`) change an existing entity through six closed operations: `addColumn`, `setColumn`, `dropColumn`, `renameColumn`, `moveColumn`, `dropRows`. "Merge two columns" is `addColumn(concat(…))` plus `dropColumn`. Type checking an edit plan also yields an **impact report**. Dropping a column that anything depends on is blocked unless the plan converts those dependents to values first. The preview says explicitly when nothing depends on a column, and says what Sheaf cannot trace (`INDIRECT`, external links, VBA).
-- **Recovery snapshots.** Before an in-place commit, the affected columns are copied to a very-hidden sheet keyed by run id, and each run can be restored. Excel's undo stack is never relied on after add-in writes.
-- **Template fill** imports a template sheet (`insertWorksheetsFromBase64`). It maps the template's headers with a query plan ending in `project` and a `template` sink, fills below the header row, and can open the result as a new workbook. An approved mapping is saved as a recipe for replay.
+- **Edit plans** (`kind: "edit"`) change an existing entity through six closed operations: `addColumn`, `setColumn`, `dropColumn`, `renameColumn`, `moveColumn`, `dropRows`. "Merge two columns" is `addColumn(concat(…))` plus `dropColumn`. Type checking an edit plan also yields an **impact report**, listing each dependent that needs consent with its class (`exclusive`, `spanning`, `wholeColumn`, `wholeRow`, and whether it names fixed rows). Removing a column that anything reads, or rows that a fixed-row reference names, is blocked unless the **user** chooses at commit to convert those dependents to values first. The preview says explicitly when nothing depends on a column, and says what Sheaf cannot trace (`INDIRECT`, external links, VBA).
+- **Undo and recovery.** An in-place commit is one grouped native undo step (`Excel.run({ mergeUndoGroup: true })`), so Ctrl+Z reverses it. For recovery after the undo history is gone, the affected columns are also kept as a snapshot on the user's computer (the add-in's origin storage), never on the service (it would be row data) and not in the workbook unless the user opts in (a hidden sheet travels with the file, and creating or removing it clears undo).
+- **Template fill** reads the template file in the pane, maps its headers with a query plan ending in `project` and a `template` sink, and by default fills it in memory and opens the result as a new workbook, leaving the source workbook and its undo history untouched. Importing the template into the workbook (`insertWorksheetsFromBase64`, which clears undo) is an opt-in. An approved mapping is saved as a recipe for replay.
 
 ---
 
@@ -255,7 +261,8 @@ sequenceDiagram
 
 **Excel-specific discipline** (the things that make it feel native rather than bolted on):
 
-- Two syncs per run — one bulk read, one bulk write. Never a sync inside a loop.
+- Two logical phases per run — bulk read, then bulk write — each split into chunks that stay under Excel on the web's 5 MB request/response limit. Never a sync per cell or per row.
+- Commit inside `Excel.run({ mergeUndoGroup: true })` so it is one undo step, and never call an API that clears the undo stack (`insertWorksheetsFromBase64`, `Worksheet.delete`, and others Microsoft lists).
 - `load()` with explicit property lists, always.
 - 2D array writes, never cell-by-cell.
 - `suspendApiCalculationUntilNextSync()` around the commit.
@@ -306,7 +313,7 @@ Rendered client-side. Same discipline as everything else: model plans, code rend
 
 **Write blast radius.** Bounded by the sink in the validated plan. Stated in the preview. Enforced by the committer's type signature.
 
-**Secrets.** The add-in bundle is a public web page. Model credentials, prompt templates, and any third-party keys live server-side only. Users can bring their own provider keys: a key is entered once in the pane, sent over HTTPS to a write-only service endpoint, encrypted at rest, and never returned, logged, or stored in the workbook (`document.settings` and custom XML travel with the file) or in browser storage. On a hosted multi-user service, BYOK requires an authenticated user and keys are scoped to that user. Zero-egress mode forces the local adapter and blocks every other outbound call.
+**Secrets.** The add-in bundle is a public web page. Model credentials, prompt templates, and any third-party keys live server-side only. Users bring their own provider keys, in one of two modes. In **store mode** (the AppSource default, no Sheaf account), the key stays in the add-in's origin storage in the user's browser and is sent over HTTPS with each planning request; the service uses it for that one call and never stores or logs it. In **vault mode** (self-hosted or organisations), the key is sent once to a write-only endpoint and encrypted at rest; on a multi-user service this requires an authenticated user and keys are scoped to that user. In both modes a key never enters the workbook (`document.settings` and custom XML travel with the file), a URL or a log. Zero-egress mode forces the local adapter and blocks every other outbound call.
 
 **Auth.** Entra ID via **NAA** (MSAL.js nested app authentication) with a dialog-based OAuth fallback for hosts where NAA isn't available. The service validates the JWT as a Spring Security resource server; tenant and user identity are read from validated claims, never from request bodies.
 
@@ -347,7 +354,7 @@ sheaf-service/
 
 Sealed interfaces + records for the IR give exhaustive pattern matching in the type checker — the compiler tells you when a new operator isn't handled everywhere. That is the main reason this core belongs in Java rather than TypeScript.
 
-`LanguageModelPort` returns a parsed `Plan` or a `ParseFailure`. Five adapters (Anthropic, OpenAI, Gemini, OpenAI-compatible, Ollama), selected per user from the pane without a restart. The generated `plan.schema.json` is passed as the response schema through each provider's native structured-output mechanism; the type checker stays the authority. No provider-specific type reaches the application layer.
+`LanguageModelPort` returns a parsed `PlannerResponse` (plan, clarify or refuse) or a `ParseFailure`. Five adapters (Anthropic, OpenAI, Gemini, OpenAI-compatible, Ollama), selected per user from the pane without a restart. The generated `planner-response.schema.json` is passed as the response schema through each provider's native structured-output mechanism; the type checker stays the authority. No provider-specific type reaches the application layer.
 
 Prompts are **versioned artifacts** in the repository, not string literals. Every run records which version produced it, because "the answers changed and I don't know why" is otherwise unanswerable.
 

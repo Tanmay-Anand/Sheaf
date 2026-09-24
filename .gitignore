@@ -1,4 +1,5 @@
 # ── Build outputs ─────────────────────────────────────────────────────────────
+service/.jqwik-database
 service/target/
 addin/dist/
 addin/node_modules/

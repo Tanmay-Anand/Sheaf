@@ -1,0 +1,50 @@
+{
+  "question": "average order value by region and channel",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "region: categorical",
+      "channel: categorical",
+      "avg_order_value: currency:INR"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "region",
+          "channel"
+        ],
+        "measures": [
+          {
+            "fn": "avg",
+            "of": "amount",
+            "as": "avg_order_value"
+          }
+        ]
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "region",
+            "dir": "asc"
+          },
+          {
+            "col": "avg_order_value",
+            "dir": "desc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

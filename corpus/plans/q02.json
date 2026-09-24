@@ -1,0 +1,58 @@
+{
+  "question": "total revenue by region, excluding returned orders",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "region: categorical",
+      "revenue: currency:INR"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "ne",
+          "left": {
+            "type": "col",
+            "col": "status"
+          },
+          "right": {
+            "type": "lit",
+            "value": "returned"
+          }
+        }
+      },
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "region"
+        ],
+        "measures": [
+          {
+            "fn": "sum",
+            "of": "amount",
+            "as": "revenue"
+          }
+        ]
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "revenue",
+            "dir": "desc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

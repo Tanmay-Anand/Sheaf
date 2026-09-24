@@ -1,0 +1,66 @@
+{
+  "question": "quarterly revenue by region, as a pivot table",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "region: categorical",
+      "*: currency:INR? (dynamic)"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "ne",
+          "left": {
+            "type": "col",
+            "col": "status"
+          },
+          "right": {
+            "type": "lit",
+            "value": "returned"
+          }
+        }
+      },
+      {
+        "op": "derive",
+        "as": "quarter",
+        "expr": {
+          "type": "quarterOf",
+          "col": "order_date"
+        }
+      },
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "region",
+          "quarter"
+        ],
+        "measures": [
+          {
+            "fn": "sum",
+            "of": "amount",
+            "as": "revenue"
+          }
+        ]
+      },
+      {
+        "op": "pivot",
+        "rows": [
+          "region"
+        ],
+        "cols": "quarter",
+        "values": "revenue"
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

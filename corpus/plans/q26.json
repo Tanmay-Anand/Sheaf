@@ -1,0 +1,42 @@
+{
+  "question": "move the email column to the front",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "email: string",
+      "contact_id: string",
+      "first_name: string",
+      "last_name: string",
+      "phone: string",
+      "company: string?",
+      "street: string?",
+      "city: categorical",
+      "postcode: string?",
+      "region: categorical",
+      "signup_date: date",
+      "status: categorical",
+      "fax: string?",
+      "lifetime_value: currency:INR"
+    ],
+    "impact": {
+      "moved": [
+        "email"
+      ]
+    }
+  },
+  "plan": {
+    "kind": "edit",
+    "target": "Contacts",
+    "ops": [
+      {
+        "op": "moveColumn",
+        "col": "email",
+        "position": {
+          "at": "first"
+        }
+      }
+    ],
+    "params": []
+  }
+}

@@ -1,5 +1,6 @@
 import type { WorkbookCatalog } from "@sheaf/contract/catalog";
 import { type Box, contains, intersects, parseAddress, sameSheet } from "./a1";
+import { CATALOG_VERSION } from "./build";
 
 /** Namespace of the custom XML part that stores the catalog inside the workbook file. */
 export const CATALOG_NAMESPACE = "urn:sheaf:catalog:v1";
@@ -24,7 +25,8 @@ export function decodeCatalogXml(xml: string): WorkbookCatalog | null {
   if (!m) return null;
   try {
     const parsed = JSON.parse(unescapeXml(m[1]!)) as WorkbookCatalog;
-    return parsed.version === 1 && Array.isArray(parsed.entities) ? parsed : null;
+    // An older catalog lacks ids and flags; returning null makes the pane rescan.
+    return parsed.version === CATALOG_VERSION && Array.isArray(parsed.entities) ? parsed : null;
   } catch {
     return null;
   }

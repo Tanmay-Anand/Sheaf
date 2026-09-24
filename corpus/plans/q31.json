@@ -1,0 +1,179 @@
+{
+  "question": "fill the enriched CRM template: full name, email domain, region name, month joined, mapped status",
+  "expect": {
+    "valid": true,
+    "warnings": [
+      "W_UNMAPPED_TEMPLATE_COLUMN"
+    ],
+    "output": [
+      "Contact Name: string",
+      "Email Domain: string?",
+      "Region Name: string?",
+      "Customer Since: string",
+      "Status: categorical?",
+      "Owner: string?"
+    ],
+    "entities": [
+      "t:Contacts",
+      "t:Regions"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Contacts",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "ne",
+          "left": {
+            "type": "col",
+            "col": "status"
+          },
+          "right": {
+            "type": "lit",
+            "value": "test"
+          }
+        }
+      },
+      {
+        "op": "lookup",
+        "with": "Regions",
+        "on": {
+          "left": "region",
+          "right": "code"
+        },
+        "take": [
+          "region_name"
+        ]
+      },
+      {
+        "op": "project",
+        "columns": [
+          {
+            "as": "Contact Name",
+            "expr": {
+              "type": "concat",
+              "parts": [
+                {
+                  "type": "col",
+                  "col": "first_name"
+                },
+                {
+                  "type": "col",
+                  "col": "last_name"
+                }
+              ],
+              "sep": " "
+            }
+          },
+          {
+            "as": "Email Domain",
+            "expr": {
+              "type": "splitPart",
+              "arg": {
+                "type": "col",
+                "col": "email"
+              },
+              "sep": "@",
+              "index": 2
+            }
+          },
+          {
+            "as": "Region Name",
+            "expr": {
+              "type": "col",
+              "col": "region_name"
+            }
+          },
+          {
+            "as": "Customer Since",
+            "expr": {
+              "type": "toText",
+              "arg": {
+                "type": "col",
+                "col": "signup_date"
+              },
+              "pattern": "mmm yyyy"
+            }
+          },
+          {
+            "as": "Status",
+            "expr": {
+              "type": "case",
+              "when": [
+                {
+                  "if": {
+                    "op": "eq",
+                    "left": {
+                      "type": "col",
+                      "col": "status"
+                    },
+                    "right": {
+                      "type": "lit",
+                      "value": "active"
+                    }
+                  },
+                  "then": {
+                    "type": "lit",
+                    "value": "Active"
+                  }
+                },
+                {
+                  "if": {
+                    "op": "eq",
+                    "left": {
+                      "type": "col",
+                      "col": "status"
+                    },
+                    "right": {
+                      "type": "lit",
+                      "value": "lead"
+                    }
+                  },
+                  "then": {
+                    "type": "lit",
+                    "value": "Prospect"
+                  }
+                },
+                {
+                  "if": {
+                    "op": "eq",
+                    "left": {
+                      "type": "col",
+                      "col": "status"
+                    },
+                    "right": {
+                      "type": "lit",
+                      "value": "churned"
+                    }
+                  },
+                  "then": {
+                    "type": "lit",
+                    "value": "Former"
+                  }
+                }
+              ],
+              "else": {
+                "type": "lit",
+                "value": null
+              }
+            }
+          },
+          {
+            "as": "Owner",
+            "expr": {
+              "type": "lit",
+              "value": null
+            }
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "template",
+      "templateId": "crm-enriched"
+    },
+    "params": []
+  }
+}

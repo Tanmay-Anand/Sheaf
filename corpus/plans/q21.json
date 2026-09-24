@@ -1,0 +1,71 @@
+{
+  "question": "merge first and last name into one column",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "contact_id: string",
+      "full_name: string",
+      "email: string",
+      "phone: string",
+      "company: string?",
+      "street: string?",
+      "city: categorical",
+      "postcode: string?",
+      "region: categorical",
+      "signup_date: date",
+      "status: categorical",
+      "fax: string?",
+      "lifetime_value: currency:INR"
+    ],
+    "impact": {
+      "added": [
+        "full_name"
+      ],
+      "removed": [
+        "first_name",
+        "last_name"
+      ]
+    },
+    "entities": [
+      "t:Contacts"
+    ]
+  },
+  "plan": {
+    "kind": "edit",
+    "target": "Contacts",
+    "ops": [
+      {
+        "op": "addColumn",
+        "as": "full_name",
+        "expr": {
+          "type": "concat",
+          "parts": [
+            {
+              "type": "col",
+              "col": "first_name"
+            },
+            {
+              "type": "col",
+              "col": "last_name"
+            }
+          ],
+          "sep": " "
+        },
+        "position": {
+          "at": "after",
+          "column": "last_name"
+        }
+      },
+      {
+        "op": "dropColumn",
+        "col": "first_name"
+      },
+      {
+        "op": "dropColumn",
+        "col": "last_name"
+      }
+    ],
+    "params": []
+  }
+}

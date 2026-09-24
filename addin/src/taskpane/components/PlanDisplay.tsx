@@ -7,10 +7,21 @@ import {
   makeStyles,
   tokens,
 } from "@fluentui/react-components";
-import type { Plan } from "../../api/planClient";
+import type { Plan, PlanRecord } from "../../api/planClient";
 
 interface Props {
-  plan: Plan;
+  record: PlanRecord;
+}
+
+function sinkLabel(sink: Extract<Plan, { kind: "query" }>["sink"]): string {
+  switch (sink.mode) {
+    case "newSheet":
+      return `new sheet "${sink.name}"`;
+    case "anchor":
+      return "a cell you choose";
+    case "template":
+      return `template ${sink.templateId}`;
+  }
 }
 
 const useStyles = makeStyles({
@@ -34,8 +45,9 @@ const useStyles = makeStyles({
   },
 });
 
-export default function PlanDisplay({ plan }: Props) {
+export default function PlanDisplay({ record }: Props) {
   const styles = useStyles();
+  const plan = record.envelope.plan;
 
   return (
     <div className={styles.root}>
@@ -44,15 +56,17 @@ export default function PlanDisplay({ plan }: Props) {
           header={<Body1>Plan received</Body1>}
           description={
             <Caption1 className={styles.label}>
-              Source: {plan.source.ref} · Steps: {plan.steps.length} ·
-              Sink: {plan.sink.mode}
+              {plan.kind === "query"
+                ? `Source: ${plan.source} · Steps: ${plan.steps.length} · Writes to: ${sinkLabel(plan.sink)}`
+                : `Edits ${plan.target} · Operations: ${plan.ops.length}`}
+              {` · IR ${record.envelope.irVersion} · ${record.planHash.slice(0, 15)}…`}
             </Caption1>
           }
         />
       </Card>
       <div>
         <Caption1 className={styles.label}>Plan JSON</Caption1>
-        <pre className={styles.pre}>{JSON.stringify(plan, null, 2)}</pre>
+        <pre className={styles.pre}>{JSON.stringify(record.envelope, null, 2)}</pre>
       </div>
     </div>
   );

@@ -1,0 +1,47 @@
+{
+  "question": "number of orders by channel",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "channel: categorical",
+      "order_count: number"
+    ],
+    "entities": [
+      "t:Orders"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "orders",
+    "steps": [
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "channel"
+        ],
+        "measures": [
+          {
+            "fn": "count",
+            "of": "*",
+            "as": "order_count"
+          }
+        ]
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "order_count",
+            "dir": "desc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

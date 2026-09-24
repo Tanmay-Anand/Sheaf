@@ -1,0 +1,66 @@
+{
+  "question": "total revenue by region",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "region: categorical",
+      "revenue: currency:INR"
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis 2",
+      "anchor": "A1"
+    },
+    "entities": [
+      "t:Orders"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "ne",
+          "left": {
+            "type": "col",
+            "col": "status"
+          },
+          "right": {
+            "type": "lit",
+            "value": "returned"
+          }
+        }
+      },
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "region"
+        ],
+        "measures": [
+          {
+            "fn": "sum",
+            "of": "amount",
+            "as": "revenue"
+          }
+        ]
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "revenue",
+            "dir": "desc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

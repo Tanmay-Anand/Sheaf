@@ -1,0 +1,40 @@
+{
+  "question": "rename phone to mobile",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "contact_id: string",
+      "first_name: string",
+      "last_name: string",
+      "email: string",
+      "mobile: string",
+      "company: string?",
+      "street: string?",
+      "city: categorical",
+      "postcode: string?",
+      "region: categorical",
+      "signup_date: date",
+      "status: categorical",
+      "fax: string?",
+      "lifetime_value: currency:INR"
+    ],
+    "impact": {
+      "renamed": [
+        "phone -> mobile"
+      ]
+    }
+  },
+  "plan": {
+    "kind": "edit",
+    "target": "Contacts",
+    "ops": [
+      {
+        "op": "renameColumn",
+        "col": "phone",
+        "to": "mobile"
+      }
+    ],
+    "params": []
+  }
+}

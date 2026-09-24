@@ -1,0 +1,111 @@
+{
+  "question": "actual vs budgeted spend by category for Jan–Apr 2025",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "category: categorical",
+      "budgeted: currency:INR",
+      "actual: currency:INR",
+      "variance: currency:INR",
+      "variance_pct: percent"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Budget",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "and",
+          "clauses": [
+            {
+              "op": "eq",
+              "left": {
+                "type": "col",
+                "col": "year"
+              },
+              "right": {
+                "type": "lit",
+                "value": 2025
+              }
+            },
+            {
+              "op": "in",
+              "col": "month",
+              "values": [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "category"
+        ],
+        "measures": [
+          {
+            "fn": "sum",
+            "of": "budgeted_amount",
+            "as": "budgeted"
+          },
+          {
+            "fn": "sum",
+            "of": "actual_amount",
+            "as": "actual"
+          }
+        ]
+      },
+      {
+        "op": "derive",
+        "as": "variance",
+        "expr": {
+          "type": "sub",
+          "a": {
+            "type": "col",
+            "col": "actual"
+          },
+          "b": {
+            "type": "col",
+            "col": "budgeted"
+          }
+        }
+      },
+      {
+        "op": "derive",
+        "as": "variance_pct",
+        "expr": {
+          "type": "pct",
+          "numerator": {
+            "type": "col",
+            "col": "variance"
+          },
+          "denominator": {
+            "type": "col",
+            "col": "budgeted"
+          }
+        }
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "variance_pct",
+            "dir": "desc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

@@ -215,7 +215,7 @@ describe("Excel Tables", () => {
   ];
   const wb = {
     ...emptyWorkbook([sheet]),
-    tables: [{ name: "Sales", sheet: "Sales", address: "Sales!A1:D4", showHeaders: true, showTotals: true, columns: ["Region", "Qty", "Price", "Amount"] }],
+    tables: [{ id: "{T-1}", name: "Sales", sheet: "Sales", address: "Sales!A1:D4", showHeaders: true, showTotals: true, columns: ["Region", "Qty", "Price", "Amount"] }],
   };
   const catalog = buildCatalog(wb, { exemplars: true, now: NOW });
 
@@ -256,7 +256,7 @@ describe("validation lists and corrections", () => {
     const catalog = buildCatalog(wb, { exemplars: true, now: NOW });
     expect(col(entity("Leads", catalog.entities), "stage").validationList).toEqual(["Won", "Lost", "Open"]);
     expect(col(entity("Lists", catalog.entities), "stages").dependents).toEqual([
-      { kind: "dataValidation", location: "Leads!B2:B4", detail: "=Lists!$A$2:$A$4" },
+      { kind: "dataValidation", location: "Leads!B2:B4", detail: "=Lists!$A$2:$A$4", refClass: "exclusive", fixedRows: false },
     ]);
   });
 

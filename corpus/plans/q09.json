@@ -1,0 +1,74 @@
+{
+  "question": "revenue share by region as a percentage of total",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "region: categorical",
+      "revenue: currency:INR",
+      "revenue_share: percent"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "ne",
+          "left": {
+            "type": "col",
+            "col": "status"
+          },
+          "right": {
+            "type": "lit",
+            "value": "returned"
+          }
+        }
+      },
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "region"
+        ],
+        "measures": [
+          {
+            "fn": "sum",
+            "of": "amount",
+            "as": "revenue"
+          }
+        ]
+      },
+      {
+        "op": "derive",
+        "as": "revenue_share",
+        "expr": {
+          "type": "pct",
+          "numerator": {
+            "type": "col",
+            "col": "revenue"
+          },
+          "denominator": {
+            "type": "sumAll",
+            "col": "revenue"
+          }
+        }
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "revenue_share",
+            "dir": "desc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

@@ -3,6 +3,8 @@ import type { CellValue } from "./types";
 import { classifyFormat, displayText, parseCell } from "./values";
 
 export interface ColumnInput {
+  /** Stable column id, assigned by the builder. */
+  id: string;
   name: string;
   letter: string;
   index: number;
@@ -70,6 +72,9 @@ export function profileColumn(input: ColumnInput, opts: ProfileOptions): Profile
   let min = Infinity;
   let max = -Infinity;
   let formulaCount = 0;
+  let realNumbers = 0;
+  let textNumbers = 0;
+  let textFormattedNumbers = 0;
   let dayFirstEvidence = 0;
   let excelDates = 0;
   let textDates = 0;
@@ -115,6 +120,11 @@ export function profileColumn(input: ColumnInput, opts: ProfileOptions): Profile
       case "number":
       case "currency":
       case "percent":
+        if (typeof cell === "number") realNumbers++;
+        else {
+          textNumbers++;
+          if (fmt === "@") textFormattedNumbers++;
+        }
         if (p.k === "number" && !p.integer) integerOnly = false;
         if (p.k !== "number") integerOnly = integerOnly && Number.isInteger(p.v);
         if (p.k === "currency") units.set(p.unit, (units.get(p.unit) ?? 0) + 1);
@@ -229,6 +239,16 @@ export function profileColumn(input: ColumnInput, opts: ProfileOptions): Profile
     warnings.push(`${plural(counts.error, "cell")} ${agree(counts.error, "shows an error", "show errors")} (${[...errorCodes].sort().join(", ")}).`);
   }
 
+  // Excel's SUM, AVERAGE and friends skip numbers stored as text, so totals silently come out
+  // short. Flag a numeric column that mixes real numbers with text ones, or holds text-formatted
+  // ("@") numbers; a column that is text throughout is how a snapshot of typed text looks, not a defect.
+  const numericKind = kind === "number" || kind === "currency" || kind === "percent";
+  const numbersStoredAsText = numericKind && ((realNumbers > 0 && textNumbers > 0) || textFormattedNumbers > 0);
+  if (numbersStoredAsText) {
+    const count = textFormattedNumbers > 0 && realNumbers === 0 ? textFormattedNumbers : textNumbers;
+    warnings.push(`${plural(count, "number")} ${agree(count, "is", "are")} stored as text; Excel's SUM and AVERAGE skip them.`);
+  }
+
   const keyKinds: ScalarKind[] = ["string", "categorical", "number"];
   const keyCandidate =
     typed >= 2 &&
@@ -241,6 +261,7 @@ export function profileColumn(input: ColumnInput, opts: ProfileOptions): Profile
   const dominantFormat = mostCommon(numberFormats);
 
   const column: CatalogColumn = {
+    id: input.id,
     name: input.name,
     letter: input.letter,
     index: input.index,
@@ -255,6 +276,8 @@ export function profileColumn(input: ColumnInput, opts: ProfileOptions): Profile
     ...(dominantFormat !== undefined ? { numberFormat: dominantFormat } : {}),
     ...(resolvedDateFormats !== undefined ? { dateFormats: resolvedDateFormats } : {}),
     ...(opts.exemplars ? { exemplars } : {}),
+    mayContainErrors: counts.error > 0,
+    numbersStoredAsText,
     dependents: [],
     warnings,
   };

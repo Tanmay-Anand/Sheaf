@@ -8,13 +8,15 @@ describe("custom XML persistence", () => {
     const sheet = sheetFromRows("A&B <Q1>", [["name", "note"], ["x", "<tag> & \"quotes\""], ["y", "]]>"]]);
     const catalog = buildCatalog(emptyWorkbook([sheet]), { exemplars: true, now: new Date(0) });
     const xml = encodeCatalogXml(catalog);
-    expect(xml.startsWith('<sheafCatalog xmlns="urn:sheaf:catalog:v1" version="1">')).toBe(true);
+    expect(xml.startsWith('<sheafCatalog xmlns="urn:sheaf:catalog:v1" version="2">')).toBe(true);
     expect(decodeCatalogXml(xml)).toEqual(catalog);
   });
 
-  it("rejects anything that isn't a version-1 catalog", () => {
+  it("rejects anything that isn't a current catalog, so an old one is rescanned", () => {
     expect(decodeCatalogXml("<other/>")).toBeNull();
-    expect(decodeCatalogXml('<sheafCatalog xmlns="urn:sheaf:catalog:v1">{"version":2,"entities":[]}</sheafCatalog>')).toBeNull();
+    // Version 1 had no ids, sheet ids or dependent classes.
+    expect(decodeCatalogXml('<sheafCatalog xmlns="urn:sheaf:catalog:v1">{"version":1,"entities":[]}</sheafCatalog>')).toBeNull();
+    expect(decodeCatalogXml('<sheafCatalog xmlns="urn:sheaf:catalog:v1">{"version":2,"entities":[]}</sheafCatalog>')).not.toBeNull();
     expect(decodeCatalogXml('<sheafCatalog xmlns="urn:sheaf:catalog:v1">not json</sheafCatalog>')).toBeNull();
   });
 });

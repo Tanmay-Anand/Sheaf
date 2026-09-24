@@ -1,0 +1,62 @@
+{
+  "question": "top 5 products by revenue",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "product_name: string",
+      "revenue: currency:INR"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "ne",
+          "left": {
+            "type": "col",
+            "col": "status"
+          },
+          "right": {
+            "type": "lit",
+            "value": "returned"
+          }
+        }
+      },
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "product_name"
+        ],
+        "measures": [
+          {
+            "fn": "sum",
+            "of": "amount",
+            "as": "revenue"
+          }
+        ]
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "revenue",
+            "dir": "desc"
+          }
+        ]
+      },
+      {
+        "op": "limit",
+        "n": 5
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": []
+  }
+}

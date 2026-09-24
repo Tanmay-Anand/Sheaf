@@ -1,0 +1,71 @@
+{
+  "question": "weekly order count, last 8 weeks (asOf is a run-time parameter)",
+  "expect": {
+    "valid": true,
+    "warnings": [],
+    "output": [
+      "week: number",
+      "order_count: number"
+    ]
+  },
+  "plan": {
+    "kind": "query",
+    "source": "Orders",
+    "steps": [
+      {
+        "op": "filter",
+        "predicate": {
+          "op": "gte",
+          "left": {
+            "type": "col",
+            "col": "order_date"
+          },
+          "right": {
+            "type": "param",
+            "name": "asOf"
+          }
+        }
+      },
+      {
+        "op": "derive",
+        "as": "week",
+        "expr": {
+          "type": "isoWeekOf",
+          "col": "order_date"
+        }
+      },
+      {
+        "op": "aggregate",
+        "groupBy": [
+          "week"
+        ],
+        "measures": [
+          {
+            "fn": "count",
+            "of": "*",
+            "as": "order_count"
+          }
+        ]
+      },
+      {
+        "op": "sort",
+        "by": [
+          {
+            "col": "week",
+            "dir": "asc"
+          }
+        ]
+      }
+    ],
+    "sink": {
+      "mode": "newSheet",
+      "name": "Analysis"
+    },
+    "params": [
+      {
+        "name": "asOf",
+        "valueType": "date"
+      }
+    ]
+  }
+}
