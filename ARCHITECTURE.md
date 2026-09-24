@@ -19,7 +19,7 @@ Non-negotiables. Everything below serves these.
 2. **Closed algebra.** No user-defined functions, no loops, no recursion, no escape hatch. Every program terminates and its output columns are statically computable. When expressiveness and verifiability conflict, verifiability wins — and the decision gets written down.
 3. **Schema out, never rows.** The model receives inferred structure and the approved semantic model. Workbook contents stay on the machine.
 4. **Evaluate before you commit.** Execution is split: a pure in-memory evaluation produces the result, the user sees real numbers and real dimensions, and only then does anything touch the grid.
-5. **Write scope is structural, not behavioural.** The committer can only write to the sink declared in the validated plan. Not because the model behaves — because the code has no other path.
+5. **Write scope is structural, not behavioural.** The committer can only write to the sink declared in the validated plan, or, for an edit plan, to the columns its operations name. Not because the model behaves — because the code has no other path. In-place edits add two more rules: the impact (what changes, and what depends on it) is shown before commit, and a recovery snapshot is taken first.
 6. **Explicit failure over plausible output.** Two repair attempts, then a legible "I couldn't express that, here's what I understood." A tool that admits defeat is more trustworthy than one that guesses.
 7. **Every run is reproducible.** The plan is the artifact. Store it, diff it, replay it.
 
@@ -50,7 +50,7 @@ flowchart TB
     end
 
     subgraph Models["LLM adapters"]
-        HOSTED[Hosted model]
+        HOSTED[Online providers · Anthropic / OpenAI / Gemini / OpenAI-compatible · BYOK]
         LOCAL[Local model · Ollama]
     end
 
@@ -207,6 +207,15 @@ Structured, machine-readable, and doubling as the repair signal:
 
 The `hint` field exists for the model, not the user. Repair loop: max **two** attempts, each fed the full diagnostic set. Fail visibly after that.
 
+### 4.6 Edit plans and template fill (v1.1)
+
+Two additions let Sheaf change a workbook, not only report on it.
+
+- **Workbook catalog.** The profiler covers every sheet, Excel Table and data region, and builds a **dependency map** of which formulas, named ranges, charts, PivotTables, validation rules and conditional formats reference each column. The catalog is stored in a custom XML part, and it holds schema and statistics, never rows. It is what the planner sees, and what impact analysis checks against.
+- **Edit plans** (`kind: "edit"`) change an existing entity through six closed operations: `addColumn`, `setColumn`, `dropColumn`, `renameColumn`, `moveColumn`, `dropRows`. "Merge two columns" is `addColumn(concat(…))` plus `dropColumn`. Type checking an edit plan also yields an **impact report**. Dropping a column that anything depends on is blocked unless the plan converts those dependents to values first. The preview says explicitly when nothing depends on a column, and says what Sheaf cannot trace (`INDIRECT`, external links, VBA).
+- **Recovery snapshots.** Before an in-place commit, the affected columns are copied to a very-hidden sheet keyed by run id, and each run can be restored. Excel's undo stack is never relied on after add-in writes.
+- **Template fill** imports a template sheet (`insertWorksheetsFromBase64`). It maps the template's headers with a query plan ending in `project` and a `template` sink, fills below the header row, and can open the result as a new workbook. An approved mapping is saved as a recipe for replay.
+
 ---
 
 ## 5. Execution model
@@ -297,7 +306,7 @@ Rendered client-side. Same discipline as everything else: model plans, code rend
 
 **Write blast radius.** Bounded by the sink in the validated plan. Stated in the preview. Enforced by the committer's type signature.
 
-**Secrets.** The add-in bundle is a public web page. Model credentials, prompt templates, and any third-party keys live server-side only.
+**Secrets.** The add-in bundle is a public web page. Model credentials, prompt templates, and any third-party keys live server-side only. Users can bring their own provider keys: a key is entered once in the pane, sent over HTTPS to a write-only service endpoint, encrypted at rest, and never returned, logged, or stored in the workbook (`document.settings` and custom XML travel with the file) or in browser storage. On a hosted multi-user service, BYOK requires an authenticated user and keys are scoped to that user. Zero-egress mode forces the local adapter and blocks every other outbound call.
 
 **Auth.** Entra ID via **NAA** (MSAL.js nested app authentication) with a dialog-based OAuth fallback for hosts where NAA isn't available. The service validates the JWT as a Spring Security resource server; tenant and user identity are read from validated claims, never from request bodies.
 
@@ -326,15 +335,19 @@ sheaf-service/
 │   ├── PromptRepository
 │   └── RunLogPort
 └── adapters/
-    ├── llm/hosted/              hosted provider
-    ├── llm/local/               Ollama
+    ├── llm/anthropic/           online, user key (BYOK)
+    ├── llm/openai/              online, user key (BYOK)
+    ├── llm/gemini/              online, user key (BYOK)
+    ├── llm/openaicompat/        any OpenAI-compatible endpoint (Azure OpenAI, OpenRouter, Groq, LM Studio, vLLM…)
+    ├── llm/ollama/              local, zero egress
+    ├── secrets/                 SecretStore: provider keys encrypted at rest
     ├── web/                     REST + Spring Security resource server
     └── persistence/             Postgres
 ```
 
 Sealed interfaces + records for the IR give exhaustive pattern matching in the type checker — the compiler tells you when a new operator isn't handled everywhere. That is the main reason this core belongs in Java rather than TypeScript.
 
-`LanguageModelPort` returns a parsed `Plan` or a `ParseFailure`. Two adapters, swapped by config. No provider-specific type reaches the application layer.
+`LanguageModelPort` returns a parsed `Plan` or a `ParseFailure`. Five adapters (Anthropic, OpenAI, Gemini, OpenAI-compatible, Ollama), selected per user from the pane without a restart. The generated `plan.schema.json` is passed as the response schema through each provider's native structured-output mechanism; the type checker stays the authority. No provider-specific type reaches the application layer.
 
 Prompts are **versioned artifacts** in the repository, not string literals. Every run records which version produced it, because "the answers changed and I don't know why" is otherwise unanswerable.
 

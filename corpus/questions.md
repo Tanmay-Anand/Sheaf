@@ -303,7 +303,7 @@ IR is identical to Q1. The `filter` step is a no-op if the metric's definition i
 - After `limit`: same type, at most 5 rows
 - `limit` is shape-preserving; output columns statically known ✓
 
-**`limit` is in the v1 set.** See `ir-decisions.md` for rationale.
+**`limit` is in the v1 set.**
 
 ---
 
@@ -340,7 +340,7 @@ IR is identical to Q1. The `filter` step is a no-op if the metric's definition i
 
 **Design tension:** `pct` needs the total across all rows, not just the current row. This requires `sumAll` — a whole-table reduction used inside a per-row expression. This is a window-function-adjacent operation.
 
-**Resolution:** `sumAll(col)` is a special aggregate reference available inside `derive` steps that follow an `aggregate` step. It references the grand total of a measure column computed in the preceding aggregate. It is **not** a general window function — it is a single, narrow escape for the percentage-of-total pattern. Added to the derive expression set with this restriction documented explicitly. See `ir-decisions.md`.
+**Resolution:** `sumAll(col)` is a special aggregate reference available inside `derive` steps that follow an `aggregate` step. It references the grand total of a measure column computed in the preceding aggregate. It is **not** a general window function — it is a single, narrow escape for the percentage-of-total pattern. Added to the derive expression set with this restriction documented explicitly.
 
 **Type trace:**
 - After `aggregate`: `{ region: categorical(6), revenue: currency:INR }`
@@ -378,7 +378,7 @@ Return rate = returned orders / total orders, per category.
 }
 ```
 
-**`countIf` is in the v1 aggregate set.** It is `count(*) WHERE predicate` — a conditional count, equivalent to `sum(case when p then 1 else 0)`. It avoids requiring a self-join or subquery for the denominator. See `ir-decisions.md`.
+**`countIf` is in the v1 aggregate set.** It is `count(*) WHERE predicate` — a conditional count, equivalent to `sum(case when p then 1 else 0)`. It avoids requiring a self-join or subquery for the denominator.
 
 **Type trace:**
 - After `aggregate`: `{ product_category: categorical(5), total_orders: number, returned_orders: number }`
@@ -415,7 +415,7 @@ Return rate = returned orders / total orders, per category.
 
 Prior columns are nullable because a region may have existed in the current period but not in the prior period.
 
-**`periodCompare` is first-class, not syntactic sugar.** The equivalent using filter + aggregate twice + join would require a self-join (not available), and would still not handle the semantics of what "Q1" means under different week-start conventions, or how to treat a region with zero prior-period revenue. See `ir-decisions.md`.
+**`periodCompare` is first-class, not syntactic sugar.** The equivalent using filter + aggregate twice + join would require a self-join (not available), and would still not handle the semantics of what "Q1" means under different week-start conventions, or how to treat a region with zero prior-period revenue.
 
 ---
 

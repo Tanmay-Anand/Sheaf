@@ -30,7 +30,7 @@ npm -version
 ```
 Sheaf/
 ├── corpus/          # Six CSV fixtures + questions.md — M-0 design corpus
-├── docs/            # ir-spec.md, ir-decisions.md, diagnostics.md
+├── docs/            # ir-spec.md, diagnostics.md
 ├── contract/        # Generated artefacts (committed snapshot)
 │   ├── schema/      #   plan.schema.json  — written by Maven
 │   └── types/       #   plan.d.ts         — written by npm
@@ -192,7 +192,6 @@ The M-0 design documents live in `docs/` and `corpus/`:
 |------|----------|
 | `corpus/questions.md` | 20 real questions with hand-written IR for each expressible one; 5 documented scope boundaries |
 | `docs/ir-spec.md` | 8 operator definitions, predicate grammar, expression set, type lattice, 10 pipeline invariants |
-| `docs/ir-decisions.md` | Operators IN with rationale; 9+ operators REJECTED with rationale |
 | `docs/diagnostics.md` | 25 error codes + 3 warnings with user-facing messages and LLM repair hints |
 
 Start with `docs/ir-spec.md` to understand the algebra, then `corpus/questions.md` to see how real questions map to IR.

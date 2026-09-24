@@ -10,7 +10,7 @@ import java.util.List;
  * An operator in the IR pipeline. Steps are applied in order to the source entity's table type.
  *
  * <p>v1 operators: filter · derive · aggregate · sort · limit · join · pivot · periodCompare.
- * Every proposed addition after v1 requires a written rationale in {@code docs/ir-decisions.md}.
+ * Every proposed addition after v1 requires a written design rationale.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "op")
 @JsonSubTypes({
