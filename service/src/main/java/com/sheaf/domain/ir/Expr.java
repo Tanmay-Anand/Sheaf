@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.sheaf.domain.common.Nullable;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public sealed interface Expr
     // ── Column and literal values ──────────────────────────────────────────────
 
     @JsonTypeName("col") record ColRef(String col) implements Expr {}
-    @JsonTypeName("lit") record Lit(Object value)  implements Expr {}
+    @JsonTypeName("lit") record Lit(@Nullable Object value)  implements Expr {}
 
     // ── Arithmetic ─────────────────────────────────────────────────────────────
 

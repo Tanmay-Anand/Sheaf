@@ -1,0 +1,268 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$defs" : {
+    "ScalarKind" : {
+      "type" : "string",
+      "enum" : [ "number", "currency", "percent", "date", "datetime", "string", "boolean", "categorical", "empty" ],
+      "title" : "ScalarKind"
+    }
+  },
+  "type" : "object",
+  "properties" : {
+    "corrections" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "column" : {
+            "type" : "string"
+          },
+          "entity" : {
+            "type" : "string"
+          },
+          "headerRow" : {
+            "type" : "integer"
+          },
+          "kind" : {
+            "$ref" : "#/$defs/ScalarKind"
+          },
+          "sheet" : {
+            "type" : "string"
+          },
+          "unit" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "entity", "sheet" ],
+        "title" : "CatalogCorrection"
+      }
+    },
+    "entities" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "type" : "string"
+          },
+          "columns" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "dateFormats" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "dependents" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      "detail" : {
+                        "type" : "string"
+                      },
+                      "kind" : {
+                        "type" : "string",
+                        "enum" : [ "formula", "namedRange", "dataValidation", "conditionalFormat", "chartSeries", "pivotTable" ],
+                        "title" : "DependentKind"
+                      },
+                      "location" : {
+                        "type" : "string"
+                      }
+                    },
+                    "required" : [ "detail", "kind", "location" ],
+                    "title" : "ColumnDependent"
+                  }
+                },
+                "distinctCount" : {
+                  "type" : "integer"
+                },
+                "exemplars" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "formula" : {
+                  "type" : "boolean"
+                },
+                "index" : {
+                  "type" : "integer"
+                },
+                "keyCandidate" : {
+                  "type" : "boolean"
+                },
+                "kind" : {
+                  "$ref" : "#/$defs/ScalarKind"
+                },
+                "letter" : {
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string"
+                },
+                "nullRate" : {
+                  "type" : "number"
+                },
+                "nullable" : {
+                  "type" : "boolean"
+                },
+                "numberFormat" : {
+                  "type" : "string"
+                },
+                "percentScale" : {
+                  "type" : "integer"
+                },
+                "unit" : {
+                  "type" : "string"
+                },
+                "validationList" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                },
+                "warnings" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "required" : [ "dependents", "distinctCount", "formula", "index", "keyCandidate", "kind", "letter", "name", "nullRate", "nullable", "warnings" ],
+              "title" : "CatalogColumn"
+            }
+          },
+          "contentHash" : {
+            "type" : "string"
+          },
+          "dataRowCount" : {
+            "type" : "integer"
+          },
+          "firstDataRow" : {
+            "type" : "integer"
+          },
+          "headerRow" : {
+            "type" : "integer"
+          },
+          "headerRows" : {
+            "type" : "integer"
+          },
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "table", "region" ],
+            "title" : "EntityKind"
+          },
+          "lastDataRow" : {
+            "type" : "integer"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "sheet" : {
+            "type" : "string"
+          },
+          "skippedRows" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "label" : {
+                  "type" : "string"
+                },
+                "reason" : {
+                  "type" : "string",
+                  "enum" : [ "blank", "sectionLabel", "totals", "title" ],
+                  "title" : "SkipReason"
+                },
+                "row" : {
+                  "type" : "integer"
+                }
+              },
+              "required" : [ "reason", "row" ],
+              "title" : "SkippedRow"
+            }
+          },
+          "tableName" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "address", "columns", "contentHash", "dataRowCount", "firstDataRow", "headerRow", "headerRows", "kind", "lastDataRow", "name", "sheet", "skippedRows" ],
+        "title" : "CatalogEntity"
+      }
+    },
+    "generatedAt" : {
+      "type" : "string",
+      "format" : "date-time"
+    },
+    "joinCandidates" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "approved" : {
+            "type" : "boolean"
+          },
+          "cardinality" : {
+            "type" : "string"
+          },
+          "confidence" : {
+            "type" : "number"
+          },
+          "fromColumn" : {
+            "type" : "string"
+          },
+          "fromEntity" : {
+            "type" : "string"
+          },
+          "overlap" : {
+            "type" : "number"
+          },
+          "toColumn" : {
+            "type" : "string"
+          },
+          "toEntity" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "approved", "cardinality", "confidence", "fromColumn", "fromEntity", "overlap", "toColumn", "toEntity" ],
+        "title" : "JoinCandidate"
+      }
+    },
+    "untraceable" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "detail" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string",
+            "enum" : [ "indirect", "offset", "externalLink", "unparsed" ],
+            "title" : "UntraceableKind"
+          },
+          "location" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "detail", "kind", "location" ],
+        "title" : "UntraceableReference"
+      }
+    },
+    "version" : {
+      "type" : "integer"
+    },
+    "warnings" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  },
+  "required" : [ "corrections", "entities", "generatedAt", "joinCandidates", "untraceable", "version", "warnings" ],
+  "title" : "WorkbookCatalog"
+}

@@ -60,6 +60,10 @@ jobs:
         run: npm ci
         working-directory: addin
 
+      - name: Generate TypeScript types from schema
+        run: npm run generate-types
+        working-directory: addin
+
       - name: Type-check
         run: npm run typecheck
         working-directory: addin
@@ -68,8 +72,8 @@ jobs:
         run: npm run lint
         working-directory: addin
 
-      - name: Generate TypeScript types from schema
-        run: npm run generate-types
+      - name: Unit and golden tests
+        run: npm test
         working-directory: addin
 
       - name: Validate manifest
@@ -117,9 +121,10 @@ jobs:
         working-directory: addin
 
       - name: Fail if contract differs from committed snapshot
+        # Test the exit code in the `if` itself: under the runner's `bash -e`, a bare failing
+        # `git diff` would end the step before the explanation below could print.
         run: |
-          git diff --exit-code contract/
-          if [ $? -ne 0 ]; then
+          if ! git diff --exit-code contract/; then
             echo "::error::Contract drift detected. Run 'mvn prepare-package' in service/ and 'npm run generate-types' in addin/, then commit the updated contract/ files."
             exit 1
           fi

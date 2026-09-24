@@ -5,11 +5,14 @@ import {
   Field,
   Input,
   Spinner,
+  Tab,
+  TabList,
   makeStyles,
   tokens,
 } from "@fluentui/react-components";
 import { fetchPlan } from "../../api/planClient";
 import PlanDisplay from "./PlanDisplay";
+import WorkbookView from "./WorkbookView";
 import type { Plan } from "../../api/planClient";
 
 const useStyles = makeStyles({
@@ -35,7 +38,9 @@ const useStyles = makeStyles({
   },
 });
 
-export default function App() {
+type TabId = "ask" | "workbook";
+
+function AskView() {
   const styles = useStyles();
   const [question, setQuestion] = useState("");
   const [plan, setPlan] = useState<Plan | null>(null);
@@ -58,8 +63,7 @@ export default function App() {
   }
 
   return (
-    <div className={styles.root}>
-      <div className={styles.header}>Sheaf</div>
+    <>
       <div className={styles.form}>
         <Field label="Ask a question about your data">
           <Input
@@ -81,6 +85,22 @@ export default function App() {
 
       {error && <div className={styles.error}>{error}</div>}
       {plan && <PlanDisplay plan={plan} />}
+    </>
+  );
+}
+
+export default function App() {
+  const styles = useStyles();
+  const [tab, setTab] = useState<TabId>("workbook");
+
+  return (
+    <div className={styles.root}>
+      <div className={styles.header}>Sheaf</div>
+      <TabList selectedValue={tab} onTabSelect={(_, d) => setTab(d.value as TabId)} size="small">
+        <Tab value="workbook">Workbook</Tab>
+        <Tab value="ask">Ask</Tab>
+      </TabList>
+      {tab === "workbook" ? <WorkbookView /> : <AskView />}
     </div>
   );
 }

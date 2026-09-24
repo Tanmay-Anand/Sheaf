@@ -43,6 +43,15 @@ class ArchitectureTest {
     }
 
     @Test
+    void domain_must_not_depend_on_adapters_or_tools() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage("com.sheaf.domain..")
+                .should().dependOnClassesThat().resideInAnyPackage("com.sheaf.adapters..", "com.sheaf.tools..");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
     void adapters_must_not_import_domain_internals_directly() {
         // Adapters access the domain through application services, not by reaching
         // directly into domain sub-packages other than the public IR types.
