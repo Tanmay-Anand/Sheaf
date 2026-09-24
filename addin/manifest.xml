@@ -23,6 +23,7 @@
 
   <!-- AppDomains must include every host the add-in contacts -->
   <AppDomains>
+    <AppDomain>https://localhost:8443</AppDomain>
     <AppDomain>https://localhost:8080</AppDomain>
   </AppDomains>
 
@@ -30,10 +31,12 @@
     <Host Name="Workbook"/>
   </Hosts>
 
-  <!-- Minimum Office requirement sets -->
+  <!-- Minimum Office requirement sets. 1.8 covers the catalog's core reads (custom XML parts,
+       data validation). Newer features (change events 1.9, chart/pivot sources 1.15) are
+       feature-gated at run time with isSetSupported. -->
   <Requirements>
-    <Sets DefaultMinVersion="1.3">
-      <Set Name="ExcelApi" MinVersion="1.3"/>
+    <Sets DefaultMinVersion="1.8">
+      <Set Name="ExcelApi" MinVersion="1.8"/>
     </Sets>
   </Requirements>
 

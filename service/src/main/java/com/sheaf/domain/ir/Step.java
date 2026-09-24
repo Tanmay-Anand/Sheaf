@@ -3,6 +3,7 @@ package com.sheaf.domain.ir;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.sheaf.domain.common.Nullable;
 
 import java.util.List;
 
@@ -68,7 +69,7 @@ public sealed interface Step
             Grain grain,
             String current,
             String prior,
-            List<String> groupBy
+            @Nullable List<String> groupBy
     ) implements Step {}
 
     // ── Supporting types ───────────────────────────────────────────────────────
@@ -81,7 +82,7 @@ public sealed interface Step
      * @param where   Optional conditional predicate (countIf / sumIf pattern).
      * @param as      Output column name.
      */
-    record AggregateMeasure(String fn, String of, Predicate where, String as) {}
+    record AggregateMeasure(String fn, String of, @Nullable Predicate where, String as) {}
 
     /** A sort key: column name and direction. */
     record SortKey(String col, String dir) {}

@@ -15,7 +15,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "paths": {
-      "@sheaf/contract": ["../contract/types/plan.d.ts"]
+      "@sheaf/contract": ["../contract/types/plan.d.ts"],
+      "@sheaf/contract/catalog": ["../contract/types/catalog.d.ts"]
     },
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

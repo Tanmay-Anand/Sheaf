@@ -3,6 +3,7 @@ package com.sheaf.domain.ir;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.sheaf.domain.common.Nullable;
 
 import java.util.List;
 
@@ -77,6 +78,6 @@ public sealed interface Predicate
     })
     sealed interface ValueRef permits ValueRef.ColRef, ValueRef.Lit {
         record ColRef(String col)   implements ValueRef {}
-        record Lit(Object value)    implements ValueRef {}
+        record Lit(@Nullable Object value)    implements ValueRef {}
     }
 }

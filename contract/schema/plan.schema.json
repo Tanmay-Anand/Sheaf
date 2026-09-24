@@ -82,7 +82,9 @@
             "$ref" : "#/$defs/SumAllExpr"
           } ]
         }
-      }
+      },
+      "required" : [ "a", "b" ],
+      "title" : "AddExpr"
     },
     "AddExpr-2" : {
       "$ref" : "#/$defs/AddExpr-1",
@@ -129,7 +131,9 @@
             } ]
           }
         }
-      }
+      },
+      "required" : [ "clauses" ],
+      "title" : "AndPredicate"
     },
     "AndPredicate-2" : {
       "$ref" : "#/$defs/AndPredicate-1",
@@ -163,7 +167,8 @@
           "const" : "bucket"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "breaks", "col", "labels", "type" ],
+      "title" : "BucketExpr"
     },
     "CaseExpr-1" : {
       "type" : "object",
@@ -248,10 +253,14 @@
                   "$ref" : "#/$defs/Lit-1"
                 } ]
               }
-            }
+            },
+            "required" : [ "if", "then" ],
+            "title" : "WhenClause"
           }
         }
-      }
+      },
+      "required" : [ "else", "when" ],
+      "title" : "CaseExpr"
     },
     "CaseExpr-2" : {
       "$ref" : "#/$defs/CaseExpr-1",
@@ -308,7 +317,9 @@
             } ]
           }
         }
-      }
+      },
+      "required" : [ "args" ],
+      "title" : "CoalesceExpr"
     },
     "CoalesceExpr-2" : {
       "$ref" : "#/$defs/CoalesceExpr-1",
@@ -330,7 +341,8 @@
           "const" : "col"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "col", "type" ],
+      "title" : "ColRef"
     },
     "ColRef-2" : {
       "type" : "object",
@@ -342,7 +354,8 @@
           "const" : "col"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "col", "type" ],
+      "title" : "ColRef"
     },
     "DayOfExpr" : {
       "type" : "object",
@@ -354,7 +367,8 @@
           "const" : "dayOf"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "col", "type" ],
+      "title" : "DayOfExpr"
     },
     "DayOfWeekExpr" : {
       "type" : "object",
@@ -366,7 +380,8 @@
           "const" : "dayOfWeek"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "col", "type" ],
+      "title" : "DayOfWeekExpr"
     },
     "DivExpr-1" : {
       "type" : "object",
@@ -449,7 +464,9 @@
             "$ref" : "#/$defs/SumAllExpr"
           } ]
         }
-      }
+      },
+      "required" : [ "a", "b" ],
+      "title" : "DivExpr"
     },
     "DivExpr-2" : {
       "$ref" : "#/$defs/DivExpr-1",
@@ -482,7 +499,8 @@
           "const" : "eq"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "left", "right", "op" ],
+      "title" : "EqPredicate"
     },
     "GtPredicate" : {
       "type" : "object",
@@ -505,7 +523,8 @@
           "const" : "gt"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "left", "right", "op" ],
+      "title" : "GtPredicate"
     },
     "GtePredicate" : {
       "type" : "object",
@@ -528,7 +547,8 @@
           "const" : "gte"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "left", "right", "op" ],
+      "title" : "GtePredicate"
     },
     "InPredicate" : {
       "type" : "object",
@@ -544,7 +564,8 @@
           "const" : "in"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "col", "values", "op" ],
+      "title" : "InPredicate"
     },
     "IsNotNullPredicate" : {
       "type" : "object",
@@ -556,7 +577,8 @@
           "const" : "isNotNull"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "col", "op" ],
+      "title" : "IsNotNullPredicate"
     },
     "IsNullPredicate" : {
       "type" : "object",
@@ -568,7 +590,8 @@
           "const" : "isNull"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "col", "op" ],
+      "title" : "IsNullPredicate"
     },
     "Lit-1" : {
       "type" : "object",
@@ -578,6 +601,7 @@
           "const" : "lit"
         }
       },
+      "title" : "Lit",
       "required" : [ "type" ]
     },
     "Lit-2" : {
@@ -588,6 +612,7 @@
           "const" : "lit"
         }
       },
+      "title" : "Lit",
       "required" : [ "type" ]
     },
     "LtPredicate" : {
@@ -611,7 +636,8 @@
           "const" : "lt"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "left", "right", "op" ],
+      "title" : "LtPredicate"
     },
     "LtePredicate" : {
       "type" : "object",
@@ -634,7 +660,8 @@
           "const" : "lte"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "left", "right", "op" ],
+      "title" : "LtePredicate"
     },
     "MonthOfExpr" : {
       "type" : "object",
@@ -646,7 +673,8 @@
           "const" : "monthOf"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "col", "type" ],
+      "title" : "MonthOfExpr"
     },
     "MulExpr-1" : {
       "type" : "object",
@@ -729,7 +757,9 @@
             "$ref" : "#/$defs/SumAllExpr"
           } ]
         }
-      }
+      },
+      "required" : [ "a", "b" ],
+      "title" : "MulExpr"
     },
     "MulExpr-2" : {
       "$ref" : "#/$defs/MulExpr-1",
@@ -762,7 +792,8 @@
           "const" : "ne"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "left", "right", "op" ],
+      "title" : "NePredicate"
     },
     "NotInPredicate" : {
       "type" : "object",
@@ -778,7 +809,8 @@
           "const" : "notIn"
         }
       },
-      "required" : [ "op" ]
+      "required" : [ "col", "values", "op" ],
+      "title" : "NotInPredicate"
     },
     "NotPredicate-1" : {
       "type" : "object",
@@ -812,7 +844,9 @@
             "$ref" : "#/$defs/NotPredicate-2"
           } ]
         }
-      }
+      },
+      "required" : [ "clause" ],
+      "title" : "NotPredicate"
     },
     "NotPredicate-2" : {
       "$ref" : "#/$defs/NotPredicate-1",
@@ -859,7 +893,9 @@
             } ]
           }
         }
-      }
+      },
+      "required" : [ "clauses" ],
+      "title" : "OrPredicate"
     },
     "OrPredicate-2" : {
       "$ref" : "#/$defs/OrPredicate-1",
@@ -952,7 +988,9 @@
             "$ref" : "#/$defs/SumAllExpr"
           } ]
         }
-      }
+      },
+      "required" : [ "denominator", "numerator" ],
+      "title" : "PctExpr"
     },
     "PctExpr-2" : {
       "$ref" : "#/$defs/PctExpr-1",
@@ -974,7 +1012,8 @@
           "const" : "quarterOf"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "col", "type" ],
+      "title" : "QuarterOfExpr"
     },
     "RatioExpr-1" : {
       "type" : "object",
@@ -1057,7 +1096,9 @@
             "$ref" : "#/$defs/SumAllExpr"
           } ]
         }
-      }
+      },
+      "required" : [ "denominator", "numerator" ],
+      "title" : "RatioExpr"
     },
     "RatioExpr-2" : {
       "$ref" : "#/$defs/RatioExpr-1",
@@ -1150,7 +1191,9 @@
             "$ref" : "#/$defs/SumAllExpr"
           } ]
         }
-      }
+      },
+      "required" : [ "a", "b" ],
+      "title" : "SubExpr"
     },
     "SubExpr-2" : {
       "$ref" : "#/$defs/SubExpr-1",
@@ -1172,7 +1215,8 @@
           "const" : "sumAll"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "col", "type" ],
+      "title" : "SumAllExpr"
     },
     "WeekOfExpr" : {
       "type" : "object",
@@ -1184,7 +1228,8 @@
           "const" : "weekOf"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "col", "type" ],
+      "title" : "WeekOfExpr"
     },
     "YearOfExpr" : {
       "type" : "object",
@@ -1196,7 +1241,8 @@
           "const" : "yearOf"
         }
       },
-      "required" : [ "type" ]
+      "required" : [ "col", "type" ],
+      "title" : "YearOfExpr"
     }
   },
   "type" : "object",
@@ -1217,7 +1263,9 @@
         "promptVersion" : {
           "type" : "string"
         }
-      }
+      },
+      "required" : [ "generatedAt", "modelId", "planHash", "promptVersion" ],
+      "title" : "PlanMeta"
     },
     "sink" : {
       "anyOf" : [ {
@@ -1233,7 +1281,8 @@
             "const" : "newSheet"
           }
         },
-        "required" : [ "mode" ]
+        "required" : [ "anchor", "name", "mode" ],
+        "title" : "NewSheetSink"
       }, {
         "type" : "object",
         "properties" : {
@@ -1247,7 +1296,8 @@
             "const" : "existingAnchor"
           }
         },
-        "required" : [ "mode" ]
+        "required" : [ "expectedCols", "range", "mode" ],
+        "title" : "ExistingAnchorSink"
       } ]
     },
     "source" : {
@@ -1256,7 +1306,9 @@
         "ref" : {
           "type" : "string"
         }
-      }
+      },
+      "required" : [ "ref" ],
+      "title" : "EntityRef"
     },
     "steps" : {
       "type" : "array",
@@ -1297,7 +1349,8 @@
               "const" : "filter"
             }
           },
-          "required" : [ "op" ]
+          "required" : [ "predicate", "op" ],
+          "title" : "FilterStep"
         }, {
           "type" : "object",
           "properties" : {
@@ -1347,7 +1400,8 @@
               "const" : "derive"
             }
           },
-          "required" : [ "op" ]
+          "required" : [ "as", "expr", "op" ],
+          "title" : "DeriveStep"
         }, {
           "type" : "object",
           "properties" : {
@@ -1400,14 +1454,17 @@
                       "$ref" : "#/$defs/NotPredicate-2"
                     } ]
                   }
-                }
+                },
+                "required" : [ "as", "fn", "of" ],
+                "title" : "AggregateMeasure"
               }
             },
             "op" : {
               "const" : "aggregate"
             }
           },
-          "required" : [ "op" ]
+          "required" : [ "groupBy", "measures", "op" ],
+          "title" : "AggregateStep"
         }, {
           "type" : "object",
           "properties" : {
@@ -1422,14 +1479,17 @@
                   "dir" : {
                     "type" : "string"
                   }
-                }
+                },
+                "required" : [ "col", "dir" ],
+                "title" : "SortKey"
               }
             },
             "op" : {
               "const" : "sort"
             }
           },
-          "required" : [ "op" ]
+          "required" : [ "by", "op" ],
+          "title" : "SortStep"
         }, {
           "type" : "object",
           "properties" : {
@@ -1440,13 +1500,15 @@
               "const" : "limit"
             }
           },
-          "required" : [ "op" ]
+          "required" : [ "n", "op" ],
+          "title" : "LimitStep"
         }, {
           "type" : "object",
           "properties" : {
             "kind" : {
               "type" : "string",
-              "enum" : [ "inner", "left" ]
+              "enum" : [ "inner", "left" ],
+              "title" : "JoinKind"
             },
             "on" : {
               "type" : "object",
@@ -1457,7 +1519,9 @@
                 "right" : {
                   "type" : "string"
                 }
-              }
+              },
+              "required" : [ "left", "right" ],
+              "title" : "JoinKey"
             },
             "with" : {
               "type" : "string"
@@ -1466,7 +1530,8 @@
               "const" : "join"
             }
           },
-          "required" : [ "op" ]
+          "required" : [ "kind", "on", "with", "op" ],
+          "title" : "JoinStep"
         }, {
           "type" : "object",
           "properties" : {
@@ -1486,7 +1551,8 @@
               "const" : "pivot"
             }
           },
-          "required" : [ "op" ]
+          "required" : [ "cols", "rows", "values", "op" ],
+          "title" : "PivotStep"
         }, {
           "type" : "object",
           "properties" : {
@@ -1495,7 +1561,8 @@
             },
             "grain" : {
               "type" : "string",
-              "enum" : [ "day", "week", "month", "quarter", "year" ]
+              "enum" : [ "day", "week", "month", "quarter", "year" ],
+              "title" : "Grain"
             },
             "groupBy" : {
               "type" : "array",
@@ -1516,9 +1583,12 @@
               "const" : "periodCompare"
             }
           },
-          "required" : [ "op" ]
+          "required" : [ "current", "grain", "metric", "prior", "timeDim", "op" ],
+          "title" : "PeriodCompareStep"
         } ]
       }
     }
-  }
+  },
+  "required" : [ "meta", "sink", "source", "steps" ],
+  "title" : "Plan"
 }

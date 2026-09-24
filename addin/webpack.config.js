@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const path = require("path");
+const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
@@ -19,7 +20,8 @@ module.exports = async (env, options) => {
     resolve: {
       extensions: [".ts", ".tsx", ".js"],
       alias: {
-        "@sheaf/contract": path.resolve(__dirname, "../contract/types/plan.d.ts"),
+        "@sheaf/contract$": path.resolve(__dirname, "../contract/types/plan.d.ts"),
+        "@sheaf/contract/catalog$": path.resolve(__dirname, "../contract/types/catalog.d.ts"),
       },
     },
     module: {
@@ -36,6 +38,9 @@ module.exports = async (env, options) => {
       ],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        __SHEAF_SERVICE_URL__: JSON.stringify(process.env.SHEAF_SERVICE_URL || "https://localhost:8443"),
+      }),
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",
