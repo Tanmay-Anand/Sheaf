@@ -1,4 +1,4 @@
-export type PlannerResponse = PlanResponse | ClarifyResponse | RefuseResponse;
+export type PlannerResponse = PlanResponse | ClarifyResponse | RefuseResponse | ExplainResponse;
 export type ValueType = "string" | "number" | "boolean" | "date" | "datetime";
 export type AggFn = "count" | "countDistinct" | "countIf" | "sum" | "avg" | "min" | "max";
 export type SortDir = "asc" | "desc";
@@ -6,7 +6,7 @@ export type JoinKind = "inner" | "left";
 export type Grain = "day" | "week" | "month" | "quarter" | "year";
 
 export interface PlanResponse {
-  annotations: Annotations;
+  annotations?: Annotations;
   plan: UnboundQuery | UnboundEdit;
   response: "plan";
   [k: string]: unknown;
@@ -23,7 +23,7 @@ export interface ColumnNote {
   [k: string]: unknown;
 }
 export interface UnboundQuery {
-  params: ParamDecl[];
+  params?: ParamDecl[];
   sink: NewSheetIntent | AnchorIntent | TemplateIntent;
   source: string;
   steps: (
@@ -423,7 +423,7 @@ export interface LookupStep {
 }
 export interface UnboundEdit {
   ops: (AddColumn | SetColumn | DropColumn | RenameColumn | MoveColumn | DropRows)[];
-  params: ParamDecl[];
+  params?: ParamDecl[];
   target: string;
   kind: "edit";
   [k: string]: unknown;
@@ -563,5 +563,10 @@ export interface RefuseResponse {
   closestSupported: string[];
   understood: string;
   response: "refuse";
+  [k: string]: unknown;
+}
+export interface ExplainResponse {
+  answer: string;
+  response: "explain";
   [k: string]: unknown;
 }

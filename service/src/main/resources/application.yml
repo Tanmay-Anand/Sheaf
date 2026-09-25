@@ -1,12 +1,65 @@
 # Local dev: if port 8080 is busy, override with: --server.port=8090
-# Windows 11 + Java 21 NIO issue workaround: add JVM flag
-#   -Djdk.nio.enableUnixDomainSpecialFiles=false
-# or run via: mvn spring-boot:run -Dspring-boot.run.jvmArguments=-Djdk.nio.enableUnixDomainSpecialFiles=false
+# Windows + Java 21: SheafApplication points jdk.net.unixdomain.tmpdir away from a temp path with
+# spaces by itself; the old -Djdk.nio.enableUnixDomainSpecialFiles=false flag is no longer needed.
 server:
   port: 8080
 
 spring:
+  # Local secrets (git-ignored): the repository's .env when run from service/, or ./.env.
+  config:
+    import: "optional:file:../.env[.properties],optional:file:./.env[.properties]"
   jackson:
     default-property-inclusion: non_null
     serialization:
       write-dates-as-timestamps: false
+
+# M5: model providers. The pane chooses provider and model, and in store mode sends its own key
+# with each request (used for that request only, never stored). The keys below are the service's
+# own, for self-hosted use. Model ids are configuration, never code.
+sheaf:
+  llm:
+    provider: openrouter
+    timeout: 90s
+    json-mode: true
+    # Only local models (Ollama on this machine), whatever the pane asks.
+    zero-egress: false
+    # Let the pane choose another endpoint. Set false on any shared service (it could be made to
+    # call internal addresses).
+    allow-custom-base-url: true
+    providers:
+      openrouter:
+        label: OpenRouter (many models, one key)
+        base-url: https://openrouter.ai/api/v1
+        api-key: ${SHEAF_OPEN_ROUTER_API_KEY:}
+        default-model: anthropic/claude-sonnet-4.6
+        models: [anthropic/claude-sonnet-4.6, anthropic/claude-sonnet-5, google/gemini-3.8-flash, openai/gpt-6-luna, deepseek/deepseek-v4.1-flash]
+      anthropic:
+        label: Anthropic (Claude)
+        base-url: https://api.anthropic.com
+        api-key: ${SHEAF_ANTHROPIC_API_KEY:}
+        default-model: claude-sonnet-4-6
+        models: [claude-sonnet-4-6, claude-sonnet-5, claude-haiku-4-5]
+      openai:
+        label: OpenAI
+        base-url: https://api.openai.com/v1
+        api-key: ${SHEAF_OPENAI_API_KEY:}
+        default-model: gpt-6-luna
+        models: [gpt-6-luna, gpt-6-sol]
+      gemini:
+        label: Google Gemini
+        base-url: https://generativelanguage.googleapis.com
+        api-key: ${SHEAF_GEMINI_API_KEY:}
+        default-model: gemini-3.8-flash
+        models: [gemini-3.8-flash, gemini-3.5-flash-lite]
+      ollama:
+        label: Ollama (local; nothing leaves this machine)
+        base-url: http://localhost:11434
+        api-key: ""
+        default-model: ""
+        models: []
+      openai-compatible:
+        label: Other OpenAI-compatible endpoint
+        base-url: ""
+        api-key: ""
+        default-model: ""
+        models: []

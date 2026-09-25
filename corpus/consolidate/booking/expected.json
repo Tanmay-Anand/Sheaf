@@ -1,0 +1,122 @@
+{
+  "bookings": 30,
+  "key": "Registration No.",
+  "rowsPerBooking": {
+    "project-bookings.xlsx": 1,
+    "loan-customers.xlsx": "0..1",
+    "addresses.xlsx": "0..1",
+    "payment-receipts.xlsx": "0..n"
+  },
+  "notRows": {
+    "loan-customers.xlsx": "the last row is a totals row (Area = 'Total:')",
+    "payment-receipts.xlsx": "three summary rows at the bottom ('Total \u2026 Amount :' in Receipt Date, merged cells)"
+  },
+  "conflicts": [
+    {
+      "registration": 4106,
+      "column": "mobile",
+      "sources": [
+        "project-bookings.xlsx",
+        "loan-customers.xlsx"
+      ]
+    },
+    {
+      "registration": 4112,
+      "column": "booking date",
+      "sources": [
+        "project-bookings.xlsx",
+        "loan-customers.xlsx"
+      ]
+    },
+    {
+      "registration": 4126,
+      "column": "name",
+      "sources": [
+        "project-bookings.xlsx",
+        "addresses.xlsx"
+      ]
+    }
+  ],
+  "notConflicts": [
+    {
+      "registration": 4118,
+      "why": "same name without the title (Mr./Ms.): equal after normalising"
+    },
+    {
+      "registration": [
+        4105,
+        4114
+      ],
+      "why": "two numbers in one cell: the first matches; the second is kept as extra"
+    }
+  ],
+  "unmatched": {
+    "missingAddress": [
+      4122
+    ],
+    "orphanReceipts": [
+      4999
+    ]
+  },
+  "dataQuality": {
+    "noPincode": [
+      4110
+    ],
+    "panWithSpaces": [
+      4117
+    ],
+    "notYetAllotted": [
+      4101,
+      4104,
+      4107,
+      4110,
+      4113,
+      4116,
+      4119,
+      4122,
+      4125,
+      4128
+    ],
+    "cancelledReceipts": [],
+    "refundReceipts": []
+  },
+  "reconciliation": {
+    "clearedReceiptTotal": 6430000,
+    "receiptsPerBooking": {
+      "4101": 3,
+      "4102": 4,
+      "4103": 4,
+      "4104": 2,
+      "4105": 2,
+      "4106": 1,
+      "4107": 2,
+      "4108": 1,
+      "4109": 2,
+      "4110": 4,
+      "4111": 3,
+      "4112": 1,
+      "4113": 3,
+      "4114": 4,
+      "4115": 1,
+      "4116": 1,
+      "4117": 1,
+      "4118": 2,
+      "4119": 1,
+      "4120": 2,
+      "4121": 3,
+      "4122": 3,
+      "4123": 3,
+      "4124": 1,
+      "4125": 1,
+      "4126": 3,
+      "4127": 1,
+      "4128": 1,
+      "4129": 4,
+      "4130": 2
+    }
+  },
+  "templateCapacity": {
+    "validatedRows": 500,
+    "note": "dropdowns cover rows 2\u2013501; more bookings than that must be flagged"
+  }
+}

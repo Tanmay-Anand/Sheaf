@@ -30,7 +30,7 @@ import java.util.Set;
  * the semantic model assumed in corpus/questions.md (approved joins, metrics, time dimensions,
  * category orders), plus the three imported templates in corpus/templates/.
  */
-final class CorpusEnvironment {
+public final class CorpusEnvironment {
 
     static final String EXACT = "crm-exact";
     static final String SYNONYMS = "crm-synonyms";
@@ -73,7 +73,7 @@ final class CorpusEnvironment {
         return new EntitySchema("t:" + name, name, "ws-" + name, Arrays.asList(columns));
     }
 
-    static TypeEnvironment build() {
+    public static TypeEnvironment build() {
         Map<String, EntitySchema> e = new LinkedHashMap<>();
         e.put("Orders", entity("Orders",
                 key("order_id", ScalarType.STRING, 75),

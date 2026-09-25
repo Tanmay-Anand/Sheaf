@@ -2471,7 +2471,7 @@
               "const" : "query"
             }
           },
-          "required" : [ "params", "sink", "source", "steps", "kind" ],
+          "required" : [ "sink", "source", "steps", "kind" ],
           "title" : "UnboundQuery"
         }, {
           "type" : "object",
@@ -2749,7 +2749,7 @@
               "const" : "edit"
             }
           },
-          "required" : [ "ops", "params", "target", "kind" ],
+          "required" : [ "ops", "target", "kind" ],
           "title" : "UnboundEdit"
         } ]
       },
@@ -2757,7 +2757,7 @@
         "const" : "plan"
       }
     },
-    "required" : [ "annotations", "plan", "response" ],
+    "required" : [ "plan", "response" ],
     "title" : "PlanResponse"
   }, {
     "type" : "object",
@@ -2795,6 +2795,18 @@
     },
     "required" : [ "closestSupported", "understood", "response" ],
     "title" : "RefuseResponse"
+  }, {
+    "type" : "object",
+    "properties" : {
+      "answer" : {
+        "type" : "string"
+      },
+      "response" : {
+        "const" : "explain"
+      }
+    },
+    "required" : [ "answer", "response" ],
+    "title" : "ExplainResponse"
   } ],
   "title" : "PlannerResponse"
 }

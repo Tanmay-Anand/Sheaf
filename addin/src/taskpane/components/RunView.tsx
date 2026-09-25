@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Body1,
   Button,
@@ -72,7 +72,7 @@ function cellText(v: unknown): string {
 
 export default function RunView() {
   const styles = useStyles();
-  const { catalog, setCatalog, setSnapshot } = useWorkbook();
+  const { catalog, setCatalog, setSnapshot, handoff, setHandoff } = useWorkbook();
   const [text, setText] = useState<string>(() => example(catalog));
   const [report, setReport] = useState<CheckReport | null>(null);
   const [params, setParams] = useState<Record<string, string>>({});
@@ -83,6 +83,18 @@ export default function RunView() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+
+  // A plan from the Ask tab arrives already checked: show it and go straight to Preview.
+  useEffect(() => {
+    if (!handoff) return;
+    setText(handoff.text);
+    setReport(handoff.report);
+    setPreview(null);
+    setTarget(null);
+    setDone(null);
+    setError(null);
+    setHandoff(null);
+  }, [handoff, setHandoff]);
 
   const plan = report?.envelope?.plan as unknown as Plan | undefined;
   const declared = plan?.params ?? [];
@@ -103,15 +115,15 @@ export default function RunView() {
     setError(null);
   };
 
-  async function check() {
+  async function check(source = text) {
     if (!catalog) return;
     reset();
     setReport(null);
     setBusy("Checking the plan…");
     try {
-      let body: unknown = text;
+      let body: unknown = source;
       try {
-        body = JSON.parse(text);
+        body = JSON.parse(source);
       } catch {
         // Not JSON: send the text as is; the service reports exactly what is wrong with it.
       }
@@ -151,6 +163,20 @@ export default function RunView() {
       setError(e instanceof PreviewRefused || e instanceof Error ? e.message : "The preview failed.");
     } finally {
       setBusy(null);
+    }
+  }
+
+  /** The same plan, written to a new sheet: a different plan (and hash), so it is checked again. */
+  async function toNewSheet() {
+    try {
+      const unbound = JSON.parse(text) as Record<string, unknown>;
+      unbound.sink = { mode: "newSheet", name: "Sheaf result" };
+      const next = JSON.stringify(unbound, null, 2);
+      setText(next);
+      setAnchor(null);
+      await check(next);
+    } catch {
+      setError("The plan text isn't valid JSON; set its sink to {\"mode\": \"newSheet\"} by hand.");
     }
   }
 
@@ -205,18 +231,18 @@ export default function RunView() {
       </div>
       {busy && <Spinner size="tiny" label={busy} />}
       {error && (
-        <MessageBar intent="error">
+        <MessageBar layout="multiline" intent="error">
           <MessageBarBody>{error}</MessageBarBody>
         </MessageBar>
       )}
       {done && (
-        <MessageBar intent="success">
+        <MessageBar layout="multiline" intent="success">
           <MessageBarBody>{done}</MessageBarBody>
         </MessageBar>
       )}
 
       {report && !report.valid && (
-        <MessageBar intent="error">
+        <MessageBar layout="multiline" intent="error">
           <MessageBarBody>
             <ul className={styles.list}>
               {report.diagnostics
@@ -239,7 +265,7 @@ export default function RunView() {
             <span className={styles.mono}>{report.planHash?.slice(0, 15)}…</span>
           </Caption1>
           {report.diagnostics.filter((d) => d.code.startsWith("W_")).map((d) => (
-            <MessageBar key={`${d.code}${d.pointer}`} intent="warning">
+            <MessageBar layout="multiline" key={`${d.code}${d.pointer}`} intent="warning">
               <MessageBarBody>{d.message}</MessageBarBody>
             </MessageBar>
           ))}
@@ -253,9 +279,14 @@ export default function RunView() {
               Preview
             </Button>
             {plan.kind === "query" && plan.sink.mode === "anchor" && (
-              <Button onClick={() => void chooseAnchor()} disabled={busy !== null}>
-                {anchor ? `Start at ${anchor.sheetName}!${anchor.address} (change)` : "Use the selected cell"}
-              </Button>
+              <>
+                <Button onClick={() => void chooseAnchor()} disabled={busy !== null}>
+                  {anchor ? `Start at ${anchor.sheetName}!${anchor.address} (change)` : "Use the selected cell"}
+                </Button>
+                <Button appearance="subtle" onClick={() => void toNewSheet()} disabled={busy !== null}>
+                  Write to a new sheet instead
+                </Button>
+              </>
             )}
           </div>
         </>
@@ -270,13 +301,13 @@ export default function RunView() {
             (plus a header row){preview.write ? ` → ${preview.write.address}` : ""}
           </Body1>
           {preview.writeRefusal && (
-            <MessageBar intent="warning">
+            <MessageBar layout="multiline" intent="warning">
               <MessageBarBody>{preview.writeRefusal}</MessageBarBody>
             </MessageBar>
           )}
           {!preview.write && !preview.writeRefusal && <Caption1 className={styles.muted}>Choose the cell where the result should start.</Caption1>}
           {target && (
-            <MessageBar intent={target.nonEmptyCells > 0 ? "warning" : "info"}>
+            <MessageBar layout="multiline" intent={target.nonEmptyCells > 0 ? "warning" : "info"}>
               <MessageBarBody>
                 Writes {target.address}:{" "}
                 {target.nonEmptyCells > 0 ? `${target.nonEmptyCells.toLocaleString()} non-empty cells there will be replaced.` : "those cells are empty."}
@@ -284,7 +315,7 @@ export default function RunView() {
             </MessageBar>
           )}
           {preview.issues.map((i) => (
-            <MessageBar key={`${i.code}${i.message}`} intent={i.blocking ? "error" : "info"}>
+            <MessageBar layout="multiline" key={`${i.code}${i.message}`} intent={i.blocking ? "error" : "info"}>
               <MessageBarBody>{i.message}</MessageBarBody>
             </MessageBar>
           ))}

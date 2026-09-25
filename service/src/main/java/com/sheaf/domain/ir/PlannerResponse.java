@@ -16,13 +16,15 @@ import java.util.List;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = PlannerResponse.PlanResponse.class,    name = "plan"),
         @JsonSubTypes.Type(value = PlannerResponse.ClarifyResponse.class, name = "clarify"),
-        @JsonSubTypes.Type(value = PlannerResponse.RefuseResponse.class,  name = "refuse")
+        @JsonSubTypes.Type(value = PlannerResponse.RefuseResponse.class,  name = "refuse"),
+        @JsonSubTypes.Type(value = PlannerResponse.ExplainResponse.class, name = "explain")
 })
 public sealed interface PlannerResponse
-        permits PlannerResponse.PlanResponse, PlannerResponse.ClarifyResponse, PlannerResponse.RefuseResponse {
+        permits PlannerResponse.PlanResponse, PlannerResponse.ClarifyResponse, PlannerResponse.RefuseResponse,
+        PlannerResponse.ExplainResponse {
 
     @JsonTypeName("plan")
-    record PlanResponse(UnboundPlan plan, Annotations annotations) implements PlannerResponse {}
+    record PlanResponse(UnboundPlan plan, @Nullable Annotations annotations) implements PlannerResponse {}
 
     /** @param options Concrete readings the user can pick from, each answerable as a plan. */
     @JsonTypeName("clarify")
@@ -34,6 +36,13 @@ public sealed interface PlannerResponse
      */
     @JsonTypeName("refuse")
     record RefuseResponse(String understood, List<String> closestSupported) implements PlannerResponse {}
+
+    /**
+     * A question about the workbook itself ("what tables do I have?", "what uses the Amount
+     * column?"), answered from its description alone: no plan, nothing runs.
+     */
+    @JsonTypeName("explain")
+    record ExplainResponse(String answer) implements PlannerResponse {}
 
     /**
      * Non-semantic notes shown in the preview, never hashed.
