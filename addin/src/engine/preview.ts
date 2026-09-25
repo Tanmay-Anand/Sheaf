@@ -81,8 +81,13 @@ export function preparePreview(input: PreviewInput): Preview {
   });
 
   const issues: Issue[] = [];
-  if (textNumbers > 0) issues.push(note(`${textNumbers.toLocaleString("en")} numbers stored as text were read as the numbers they show (Excel's own SUM would skip them).`, textNumbers));
-  if (unreadable > 0) issues.push(note(`${unreadable.toLocaleString("en")} cells didn't fit their column's type and count as #VALUE! errors.`, unreadable));
+  const n = (count: number, one: string, many: string) => `${count.toLocaleString("en")} ${count === 1 ? one : many}`;
+  if (textNumbers > 0) {
+    issues.push(note(`${n(textNumbers, "number stored as text was", "numbers stored as text were")} read as the number${textNumbers === 1 ? "" : "s"} shown (Excel's own SUM would skip ${textNumbers === 1 ? "it" : "them"}).`, textNumbers));
+  }
+  if (unreadable > 0) {
+    issues.push(note(`${n(unreadable, "cell didn't", "cells didn't")} fit the column's type and count${unreadable === 1 ? "s" : ""} as #VALUE! error${unreadable === 1 ? "" : "s"}.`, unreadable));
+  }
   if (catalog.dateSystem === "unknown") issues.push(note("The workbook's date system couldn't be confirmed; dates are read as the 1900 system (Excel's default).", 0));
   issues.push(...result.issues);
 

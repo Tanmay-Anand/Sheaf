@@ -6,7 +6,7 @@ export type JoinKind = "inner" | "left";
 export type Grain = "day" | "week" | "month" | "quarter" | "year";
 
 export interface UnboundQuery {
-  params: ParamDecl[];
+  params?: ParamDecl[];
   sink: NewSheetIntent | AnchorIntent | TemplateIntent;
   source: string;
   steps: (
@@ -406,7 +406,7 @@ export interface LookupStep {
 }
 export interface UnboundEdit {
   ops: (AddColumn | SetColumn | DropColumn | RenameColumn | MoveColumn | DropRows)[];
-  params: ParamDecl[];
+  params?: ParamDecl[];
   target: string;
   kind: "edit";
   [k: string]: unknown;

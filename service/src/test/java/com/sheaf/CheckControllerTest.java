@@ -19,7 +19,7 @@ class CheckControllerTest {
 
     @Autowired MockMvc mockMvc;
 
-    private static final String CATALOG = """
+    static final String CATALOG = """
             {
               "version": 2, "generatedAt": "2026-09-25T10:00:00Z", "dateSystem": "1900",
               "entities": [{

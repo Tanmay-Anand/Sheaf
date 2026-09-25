@@ -185,7 +185,35 @@ The pane opens on the **Workbook** tab. **Scan workbook** reads every sheet and 
 
 The **Run** tab (M4) takes a plan pasted as JSON, in the unbound format of `docs/ir-spec.md` §1.1. **Example** fills in a plan for the first table found. **Check** sends the plan and the catalog to `POST /api/check`, which binds and type-checks it; errors come back with a JSON Pointer and a repair hint. **Preview** rescans the workbook and evaluates the plan in the pane. It shows the exact extent, the first rows, and every issue (error cells, numbers stored as text…). **Commit** writes exactly that result, as one undo step. It refuses if anything the preview read has changed since. A plan with `"sink": {"mode": "anchor"}` writes into an existing sheet at the cell you select (**Use the selected cell**).
 
-The **Ask** tab calls `/api/plan`, which still returns the hardcoded Q1 plan until the planner lands in M5.
+The **Ask** tab (M5) plans a question with a language model. Put the OpenRouter key in the repository's `.env` file (git-ignored), then restart the service:
+
+```
+SHEAF_OPEN_ROUTER_API_KEY=sk-or-...
+```
+
+The service reads `.env` itself (`spring.config.import` in `application.yml`). Instead of a key on the service, you can paste a key in the pane:
+1. In the Ask tab, click the model button next to **Plan**.
+2. Pick a provider (OpenRouter, Anthropic, OpenAI, Gemini, Ollama, or another OpenAI-compatible endpoint).
+3. **Save key**, then **Test connection**.
+
+A pasted key stays in this browser's storage for the add-in, never in the workbook. It is sent only with your questions, and **Remove key** deletes it.
+
+**Zero-egress mode** allows only a model on your computer (Ollama at `http://localhost:11434`). Set `sheaf.llm.zero-egress: true` on the service to enforce it for everyone.
+
+Model ids and providers switch per question, with no restart. Only the catalog is sent (names, types, and sample values if the switch in the Workbook tab allows them), never rows. A plan comes back checked; **Preview in Run** opens it in the Run tab. A vague question gets a clarifying question; one Sheaf can't do gets a refusal with alternatives. Each answer shows the model, the number of calls, the tokens used and the cost.
+
+Links between tables are proposed by the scan but not yet approved (approval arrives in M8), so questions that need a join or lookup are refused for now.
+
+To measure accuracy on the corpus (costs money; stops at the budget):
+
+```bash
+cd service
+mvn test -Dtest=PlannerEvalTest -Dsheaf.eval.model=anthropic/claude-sonnet-4.6 -Dsheaf.eval.budget=0.60
+```
+
+The table is written to `service/target/eval/`. Add `-Dsheaf.eval.only=q01,q05` to run a few questions. For a local model (free; slow on CPU), add `-Dsheaf.eval.provider=ollama` and use an Ollama model name, e.g. `-Dsheaf.eval.model=qwen3:8b`.
+
+On Windows, the service now sets `jdk.net.unixdomain.tmpdir` itself when the temp path contains a space, so the old JVM flag is no longer needed (it still works).
 
 **To check by hand in Excel (M4):**
 1. Commit a plan, then press Ctrl+Z once: the whole result should disappear.

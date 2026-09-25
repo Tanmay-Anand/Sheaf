@@ -90,14 +90,14 @@ public final class Binder {
             }
         };
         if (sink == null) return new BindResult(null, d.all());
-        return new BindResult(new Plan.QueryPlan(source.name(), steps, sink, q.params(), bindings(used.values())), d.all());
+        return new BindResult(new Plan.QueryPlan(source.name(), steps, sink, q.params() == null ? List.of() : q.params(), bindings(used.values())), d.all());
     }
 
     private static BindResult bindEdit(UnboundPlan.UnboundEdit e, TypeEnvironment env, Diags d) {
         d.at(null, "target", "");
         var target = resolve(e.target(), "target", env, d);
         if (target == null) return new BindResult(null, d.all());
-        return new BindResult(new Plan.EditPlan(target.name(), e.ops(), e.params(), bindings(List.of(target))), d.all());
+        return new BindResult(new Plan.EditPlan(target.name(), e.ops(), e.params() == null ? List.of() : e.params(), bindings(List.of(target))), d.all());
     }
 
     private static @Nullable TypeEnvironment.EntitySchema resolve(String name, String field, TypeEnvironment env, Diags d) {

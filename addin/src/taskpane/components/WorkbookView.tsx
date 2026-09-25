@@ -222,12 +222,12 @@ export default function WorkbookView() {
       </div>
       {busy && <Spinner size="tiny" label={busy} />}
       {error && (
-        <MessageBar intent="error">
+        <MessageBar layout="multiline" intent="error">
           <MessageBarBody>{error}</MessageBarBody>
         </MessageBar>
       )}
       {(stale.entities.size > 0 || stale.outside) && (
-        <MessageBar intent="warning">
+        <MessageBar layout="multiline" intent="warning">
           <MessageBarBody>
             Changed since the last scan: {[...stale.entities].join(", ") || "cells outside known tables"}. Rescan to update.
           </MessageBarBody>
@@ -240,17 +240,17 @@ export default function WorkbookView() {
             {catalog.entities.length} {catalog.entities.length === 1 ? "table" : "tables"} · {columnCount} {columnCount === 1 ? "column" : "columns"} · scanned {new Date(catalog.generatedAt).toLocaleString()}
           </Caption1>
           {typeof service === "string" && (
-            <MessageBar intent="warning">
+            <MessageBar layout="multiline" intent="warning">
               <MessageBarBody>{service}</MessageBarBody>
             </MessageBar>
           )}
           {service && typeof service !== "string" && !service.accepted && (
-            <MessageBar intent="error">
+            <MessageBar layout="multiline" intent="error">
               <MessageBarBody>The service refused the catalog: {service.violations.join(" ")}</MessageBarBody>
             </MessageBar>
           )}
           {catalog.warnings.length > 0 && (
-            <MessageBar intent="warning">
+            <MessageBar layout="multiline" intent="warning">
               <MessageBarBody>
                 <ul className={styles.list}>
                   {catalog.warnings.map((w) => (

@@ -2435,7 +2435,7 @@
         "const" : "query"
       }
     },
-    "required" : [ "params", "sink", "source", "steps", "kind" ],
+    "required" : [ "sink", "source", "steps", "kind" ],
     "title" : "UnboundQuery"
   }, {
     "type" : "object",
@@ -2713,7 +2713,7 @@
         "const" : "edit"
       }
     },
-    "required" : [ "ops", "params", "target", "kind" ],
+    "required" : [ "ops", "target", "kind" ],
     "title" : "UnboundEdit"
   } ],
   "title" : "UnboundPlan"

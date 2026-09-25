@@ -63,4 +63,13 @@ class ArchitectureTest {
 
         rule.check(importedClasses);
     }
+
+    @Test
+    void only_model_adapters_call_out_over_http() {
+        // Outbound calls carry workbook descriptions and keys: they happen in adapters/llm and nowhere else.
+        ArchRule rule = noClasses()
+                .that().resideOutsideOfPackage("com.sheaf.adapters.llm..")
+                .should().dependOnClassesThat().resideInAPackage("java.net.http..");
+        rule.check(importedClasses);
+    }
 }

@@ -6,8 +6,30 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const devCerts = require("office-addin-dev-certs");
 
+/**
+ * Content Security Policy for the pane. Store mode keeps API keys in this origin's storage, so no
+ * script may run here except the bundle and Microsoft's Office.js, and the pane may talk only to
+ * the Sheaf service and Microsoft (Office.js). Styles need 'unsafe-inline' (Fluent UI injects them).
+ */
+function contentSecurityPolicy(serviceUrl, dev) {
+  const microsoft = "https://appsforoffice.microsoft.com https://*.microsoft.com https://*.office.com https://*.office.net https://*.officeapps.live.com";
+  return [
+    "default-src 'self'",
+    `script-src 'self' ${microsoft}`,
+    `connect-src 'self' ${serviceUrl} ${microsoft}${dev ? " wss://localhost:3000 https://localhost:3000" : ""}`,
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: ${microsoft}`,
+    `font-src 'self' data: ${microsoft}`,
+    `frame-src ${microsoft}`,
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'none'",
+  ].join("; ");
+}
+
 module.exports = async (env, options) => {
   const dev = options.mode === "development";
+  const serviceUrl = process.env.SHEAF_SERVICE_URL || "https://localhost:8443";
   const config = {
     devtool: dev ? "source-map" : false,
     entry: {
@@ -43,12 +65,13 @@ module.exports = async (env, options) => {
     },
     plugins: [
       new webpack.DefinePlugin({
-        __SHEAF_SERVICE_URL__: JSON.stringify(process.env.SHEAF_SERVICE_URL || "https://localhost:8443"),
+        __SHEAF_SERVICE_URL__: JSON.stringify(serviceUrl),
       }),
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",
         chunks: ["taskpane"],
+        csp: contentSecurityPolicy(serviceUrl, dev),
       }),
       new CopyWebpackPlugin({
         patterns: [{ from: "assets", to: "assets", noErrorOnMissing: true }],

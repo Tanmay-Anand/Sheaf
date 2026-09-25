@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.sheaf.domain.common.Nullable;
+
 import java.util.List;
 
 /**
@@ -18,11 +20,12 @@ import java.util.List;
 })
 public sealed interface UnboundPlan permits UnboundPlan.UnboundQuery, UnboundPlan.UnboundEdit {
 
-    List<ParamDecl> params();
+    /** Absent means none; the bound plan always carries the (possibly empty) list. */
+    @Nullable List<ParamDecl> params();
 
     @JsonTypeName("query")
-    record UnboundQuery(String source, List<Step> steps, SinkIntent sink, List<ParamDecl> params) implements UnboundPlan {}
+    record UnboundQuery(String source, List<Step> steps, SinkIntent sink, @Nullable List<ParamDecl> params) implements UnboundPlan {}
 
     @JsonTypeName("edit")
-    record UnboundEdit(String target, List<EditOp> ops, List<ParamDecl> params) implements UnboundPlan {}
+    record UnboundEdit(String target, List<EditOp> ops, @Nullable List<ParamDecl> params) implements UnboundPlan {}
 }
